@@ -49,7 +49,6 @@ function Scene() {
 
 function HitTestExample() {
   const ref = useRef<any>(null);
-
   useHitTest((hit) => {
     if (!ref.current) {
       return;
@@ -61,18 +60,52 @@ function HitTestExample() {
     );
   });
 
+  const [isHovered, setIsHovered] = useState(false);
+  const [boxes, setBoxes] = useState<{ position: number[] }[]>([]);
+
+  const handleSelect = () => {
+    console.log("🚨 ~ HitTestExample ~ handleSelect");
+    const newBox = { position: ref.current.position };
+    setBoxes((prevBoxes) => [...prevBoxes, newBox]);
+  };
   return (
-    // <Interactive ref={ref}>
-    <Box
-      ref={ref}
-      // position={[0, 0, 0]}
-      args={[0.1, 0.1, 0.1]}
-      material-transparent={true}
-      material-opacity={0.5}
-      material-color={"#ad0606"}
-      /* scale={0.1} */ {...({} as any)}
-    />
-    // </Interactive>
+    <Interactive
+      onHover={() => {
+        setIsHovered(true);
+        console.log("🚨 ~ HitTestExample ~ onHover");
+      }}
+      onBlur={() => {
+        setIsHovered(false);
+        console.log("🚨 ~ HitTestExample ~ onBlur");
+      }}
+      onSelect={handleSelect}
+      onSelectEnd={() => console.log("🚨 ~ HitTestExample ~ onSelectEnd")}
+      onSelectStart={() => console.log("🚨 ~ HitTestExample ~ onSelectStart")}
+      onSqueeze={() => console.log("🚨 ~ HitTestExample ~ onSqueeze")}
+      onSqueezeEnd={() => console.log("🚨 ~ HitTestExample ~ onSqueezeEnd")}
+      onSqueezeStart={() => console.log("🚨 ~ HitTestExample ~ onSqueezeStart")}
+    >
+      <Box
+        ref={ref}
+        // position={[0, 0, 0]}
+        args={[0.1, 0.1, 0.1]}
+        material-transparent={true}
+        material-opacity={0.5}
+        material-color={isHovered ? "#06ad30" : "#ad0606"}
+        /* scale={0.1} */ {...({} as any)}
+      />
+      {boxes.map(({ position }) => (
+        <Box
+          ref={ref}
+          position={position}
+          args={[0.1, 0.1, 0.1]}
+          material-transparent={true}
+          material-opacity={0.5}
+          material-color={isHovered ? "#06ad30" : "#ad0606"}
+          /* scale={0.1} */ {...({} as any)}
+        />
+      ))}
+    </Interactive>
   );
 }
 
