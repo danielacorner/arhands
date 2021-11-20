@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import "./App.css";
 import {
   ARCanvas,
@@ -66,10 +67,10 @@ function usePlayerControls() {
       setMovement((m) => ({ ...m, [moveFieldByKey(e.code)]: false }));
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
-    return () => (
-      document.removeEventListener("keydown", handleKeyDown),
-      document.removeEventListener("keyup", handleKeyUp)
-    );
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+    };
   }, []);
   return movement;
 }
@@ -133,7 +134,10 @@ function Player(props) {
   const { forward, backward, left, right, jump } = usePlayerControls();
   const { camera } = useThree();
   const velocity = useRef([0, 0, 0]);
-  useEffect(() => api.velocity.subscribe((v) => (velocity.current = v)), []);
+  useEffect(
+    () => api.velocity.subscribe((v) => (velocity.current = v)),
+    [api.velocity]
+  );
   useFrame((state) => {
     // ref.current.getWorldPosition(camera.position);
     // frontVector.set(0, 0, Number(backward) - Number(forward));
@@ -177,20 +181,23 @@ function Cube(props) {
   const [ref] = useBox(() => ({ type: "Static", ...props }));
   const [hover, set] = useState<any>(null);
   // const texture = useLoader(THREE.TextureLoader, dirt);
-  const onMove = useCallback(
-    (e) => (e.stopPropagation(), set(Math.floor(e.faceIndex / 2))),
-    []
-  );
-  const onOut = useCallback(() => set(null), []);
-  const onClick = useCallback((e) => {
-    if (!ref.current) {
-      return;
-    }
+  const onMove = useCallback((e) => {
     e.stopPropagation();
-    const { x, y, z } = ref.current.position;
-    const dir = [[x + 1, y, z], [x - 1, y, z], [x, y + 1, z], [x, y - 1, z], [x, y, z + 1], [x, y, z - 1]] // prettier-ignore
-    addCube(dir[Math.floor(e.faceIndex / 2)] as any);
+    set(Math.floor(e.faceIndex / 2));
   }, []);
+  const onOut = useCallback(() => set(null), []);
+  const onClick = useCallback(
+    (e) => {
+      if (!ref.current) {
+        return;
+      }
+      e.stopPropagation();
+      const { x, y, z } = ref.current.position;
+      const dir = [[x + 1, y, z], [x - 1, y, z], [x, y + 1, z], [x, y - 1, z], [x, y, z + 1], [x, y, z - 1]] // prettier-ignore
+      addCube(dir[Math.floor(e.faceIndex / 2)] as any);
+    },
+    [ref]
+  );
   return (
     <mesh
       ref={ref}
