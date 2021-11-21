@@ -5,7 +5,7 @@ import { useThree, useFrame } from "@react-three/fiber";
 import { useSphere } from "@react-three/cannon";
 import { useWindowSize } from "react-use";
 import { Axe } from "./Axe";
-import { speed, rotation } from "./utils";
+import { speed, rotation } from "./store";
 // import { usePlayerControls } from "./usePlayerControls";
 
 export function Player(props) {

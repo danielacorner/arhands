@@ -1,8 +1,15 @@
 import { useCallback, useState } from "react";
 import { useBox } from "@react-three/cannon";
-import { addCube, useCubes } from "./utils";
+import { useCubes } from "./store";
 
 export function Cube(props) {
+  const [, setCubes] = useCubes();
+  const addCube = useCallback(
+    (newCube) => {
+      setCubes((prev) => [...prev, newCube]);
+    },
+    [setCubes]
+  );
   const [ref] = useBox(() => ({ type: "Static", ...props }));
   const [hover, set] = useState<any>(null);
   // const texture = useLoader(THREE.TextureLoader, dirt);
@@ -21,7 +28,7 @@ export function Cube(props) {
       const dir = [[x + 1, y, z], [x - 1, y, z], [x, y + 1, z], [x, y - 1, z], [x, y, z + 1], [x, y, z - 1]]; // prettier-ignore
       addCube(dir[Math.floor(e.faceIndex / 2)] as any);
     },
-    [ref]
+    [addCube, ref]
   );
   return (
     <mesh
@@ -45,7 +52,8 @@ export function Cube(props) {
   );
 }
 export function Cubes() {
-  const cubes = useCubes();
+  const [cubes] = useCubes();
+
   return (
     <>
       {cubes.map((coords, index) => (
