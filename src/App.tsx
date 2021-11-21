@@ -20,6 +20,8 @@ import * as Y from "yjs";
 import { bindProxyAndYMap } from "valtio-yjs";
 import { WebrtcProvider } from "y-webrtc";
 import MinecraftHammer from "./components/MinecraftHammer";
+import styled from "styled-components/macro";
+import { useWindowSize } from "react-use";
 
 const SPEED = 5;
 const keys = {
@@ -156,6 +158,12 @@ function Player(props) {
     // if (jump && Math.abs(velocity.current[1].toFixed(2)) < 0.05)
     //   api.velocity.set(velocity.current[0], 10, velocity.current[2]);
   });
+
+  const { width } = useWindowSize();
+  const axx = width / 1000;
+  console.log("🌟🚨 ~ Player ~ axx", axx);
+  const { ax, ay, az } = useControls({ ax: 2.54 * axx, ay: -1.35, az: -2.45 });
+
   return (
     <>
       <mesh ref={ref} />
@@ -163,7 +171,7 @@ function Player(props) {
         ref={axe}
         onPointerMissed={(e) => (axe.current.children[0].rotation.x = -0.5)}
       >
-        <Axe position={[0.15, -0.35, 0.5]} />
+        <Axe position={[ax, ay, az]} />
       </group>
     </>
   );
@@ -229,19 +237,44 @@ export default function App() {
   console.log("🌟🚨 ~ App ~ player", player);
   console.log("🌟🚨 ~ App ~ controllers", controllers);
 
+  const { height, width } = useWindowSize();
   return (
-    <div className="App">
+    <AppStyles className="App">
       <header className="App-header">
-        Click "Start AR" 👇
-        <ARCanvas sessionInit={{ requiredFeatures: ["hit-test"] }}>
+        {/* <div className="cta">Click "Start AR" 👇</div> */}
+        <ARCanvas
+          sessionInit={{ requiredFeatures: ["hit-test"] }}
+          style={{
+            width,
+            height,
+          }}
+        >
           <DefaultXRControllers />
           <Hands />
           <Scene />
         </ARCanvas>
       </header>
-    </div>
+    </AppStyles>
   );
 }
+
+const AppStyles = styled.div`
+  .cta {
+    position: absolute;
+    top: 40vh;
+    left: 0;
+    right: 0;
+  }
+  /* canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  } */
+`;
 
 function Scene() {
   const { px, py, pz } = { px: -2.15, py: 5, pz: 0.1 };
