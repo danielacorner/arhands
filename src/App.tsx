@@ -8,7 +8,7 @@ import styled from "styled-components/macro";
 import { useWindowSize } from "react-use";
 import { Player } from "./Player";
 import { Cube, Cubes } from "./Cube";
-import { HitTestClickable } from "./HitTestClickable";
+import { PlaceableBlock } from "./PlaceableBlock";
 
 export default function App() {
   const [count, setCount] = useState(0);
@@ -54,7 +54,7 @@ function Scene() {
   return (
     <>
       <ambientLight intensity={0.4} />
-      <HitTestClickable />
+      <PlaceableBlock />
       <directionalLight position={[px, py, pz]} intensity={4} />
       <Physics gravity={[0, -30, 0]}>
         <Player />

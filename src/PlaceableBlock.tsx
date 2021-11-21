@@ -3,7 +3,7 @@ import { Box } from "@react-three/drei";
 import { useRef, useState } from "react";
 import { useGeolocation } from "react-use";
 
-export function HitTestClickable() {
+export function PlaceableBlock() {
   const ref = useRef<any>(null);
   useHitTest((hit) => {
     if (!ref.current) {

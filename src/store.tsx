@@ -1,8 +1,8 @@
 import * as THREE from "three";
 // import { proxy, subscribe, snapshot } from "valtio";
-import * as Y from "yjs";
-import { bindProxyAndYMap } from "valtio-yjs";
-import { WebrtcProvider } from "y-webrtc";
+// import * as Y from "yjs";
+// import { bindProxyAndYMap } from "valtio-yjs";
+// import { WebrtcProvider } from "y-webrtc";
 import { atomWithStorage } from "jotai/utils";
 import { useAtom } from "jotai";
 
