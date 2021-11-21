@@ -13,13 +13,13 @@ import { useControls } from "leva";
 import * as THREE from "three";
 import { useRef, useCallback, useEffect, useState } from "react";
 import { Canvas, useLoader, useThree, useFrame } from "@react-three/fiber";
-import { Sky, PointerLockControls, useGLTF } from "@react-three/drei";
+import { Sky, useGLTF } from "@react-three/drei";
 import { Physics, useBox, useSphere, usePlane } from "@react-three/cannon";
 import { proxy, subscribe, snapshot } from "valtio";
 import * as Y from "yjs";
 import { bindProxyAndYMap } from "valtio-yjs";
 import { WebrtcProvider } from "y-webrtc";
-// import axeUrl from "./assets/axe.glb";
+import MinecraftHammer from "./components/MinecraftHammer";
 
 const SPEED = 5;
 const keys = {
@@ -98,7 +98,6 @@ function usePlayerControls() {
 
 function Axe(props) {
   const group = useRef();
-  // const { nodes, materials } = useGLTF(axeUrl) as any;
   return (
     <group ref={group} dispose={null} {...props}>
       <group rotation={[0, Math.PI / 1.8, -0.3]} scale={0.5}>
@@ -110,14 +109,7 @@ function Axe(props) {
           {...({} as any)}
           // material-color={isHovered ? "#06ad30" : "#ad0606"}
         />
-        {/* <mesh
-          geometry={nodes.Mesh_1001_1.geometry}
-          material={materials.material_2}
-        />
-        <mesh
-          geometry={nodes.Mesh_1001_2.geometry}
-          material={materials.material_3}
-        /> */}
+        <MinecraftHammer />
       </group>
     </group>
   );
@@ -257,20 +249,20 @@ function Scene() {
   return (
     <>
       <ambientLight intensity={0.4} />
-      <HitTestExample />
+      <HitTestClickable />
       <directionalLight position={[px, py, pz]} intensity={4} />
       <Physics gravity={[0, -30, 0]}>
         <Player />
         <Cube position={[0, 0.5, -10]} />
         <Cubes />
       </Physics>
-      <PointerLockControls {...({} as any)} />
+      {/* <PointerLockControls {...({} as any)} /> */}
       {/* <Button position={[x, y, z]}  /> */}
     </>
   );
 }
 
-function HitTestExample() {
+function HitTestClickable() {
   const ref = useRef<any>(null);
   useHitTest((hit) => {
     if (!ref.current) {
