@@ -1,9 +1,11 @@
 import { Interactive, useHitTest } from "@react-three/xr";
-import { Box } from "@react-three/drei";
+import { Box, Html } from "@react-three/drei";
 import { useRef, useState } from "react";
 import { useGeolocation } from "react-use";
+import { Icon } from "@mui/material";
+import { LocationOff } from "@mui/icons-material";
 
-export function HitTestClickable() {
+export function PlaceableBlock() {
   const ref = useRef<any>(null);
   useHitTest((hit) => {
     if (!ref.current) {
@@ -48,7 +50,13 @@ export function HitTestClickable() {
     // timestamp,
   });
 
-  return (
+  return loading ? (
+    <Html>
+      <Icon>
+        <LocationOff />
+      </Icon>
+    </Html>
+  ) : (
     <Interactive
       onHover={() => {
         setIsHovered(true);

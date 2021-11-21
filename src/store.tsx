@@ -1,8 +1,8 @@
 import * as THREE from "three";
 // import { proxy, subscribe, snapshot } from "valtio";
-import * as Y from "yjs";
-import { bindProxyAndYMap } from "valtio-yjs";
-import { WebrtcProvider } from "y-webrtc";
+// import * as Y from "yjs";
+// import { bindProxyAndYMap } from "valtio-yjs";
+// import { WebrtcProvider } from "y-webrtc";
 import { atomWithStorage } from "jotai/utils";
 import { useAtom } from "jotai";
 
@@ -21,10 +21,8 @@ export const moveFieldByKey = (key) => keys[key];
 export const rotation = new THREE.Vector3();
 export const speed = new THREE.Vector3();
 
-export const cubesAtom = atomWithStorage<[x: number, y: number, z: number][]>(
-  "cubes",
-  []
-);
+export type CubeType = { position: [number, number, number][] };
+export const cubesAtom = atomWithStorage<CubeType[]>("cubes", []);
 export const useCubes = () => {
   return useAtom(cubesAtom);
 };
