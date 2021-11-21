@@ -1,9 +1,10 @@
-import { Interactive, useHitTest } from "@react-three/xr";
+import { Interactive, useHitTest, useXRFrame } from "@react-three/xr";
 import { Box, Html } from "@react-three/drei";
 import { useRef, useState } from "react";
 import { useGeolocation } from "react-use";
 import { Icon } from "@mui/material";
 import { LocationOff } from "@mui/icons-material";
+import { useFrame } from "@react-three/fiber";
 
 export function PlaceableBlock() {
   const ref = useRef<any>(null);
@@ -32,20 +33,30 @@ export function PlaceableBlock() {
     latitude,
     longitude,
     loading,
+    heading,
     // accuracy,
     // altitudeAccuracy,
-    // heading,
     // speed,
     // timestamp,
   } = useGeolocation();
+  useXRFrame((time, xrFrame) => {
+    if (!ref.current) {
+      return;
+    }
+    ref.current.rotation = heading;
+  });
+  // useFrame(() => {
+  //   ref.current.rotation = heading;
+  // });
+
   console.log("🌟🚨 ~ HitTestClickable ~ geolocation", {
     altitude,
     latitude,
     longitude,
     loading,
+    heading,
     // accuracy,
     // altitudeAccuracy,
-    // heading,
     // speed,
     // timestamp,
   });
