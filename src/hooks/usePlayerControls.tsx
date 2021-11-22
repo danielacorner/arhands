@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { moveFieldByKey } from "./store";
+import { moveFieldByKey } from "../store";
 
 export function usePlayerControls() {
   const [movement, setMovement] = useState({

@@ -1,6 +1,6 @@
 import { Box } from "@react-three/drei";
 import { useRef } from "react";
-import MinecraftHammer from "./components/MinecraftHammer";
+import MinecraftHammer from "./MinecraftHammer";
 
 // export default function App() {
 //   return (

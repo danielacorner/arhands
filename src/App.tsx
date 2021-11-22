@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "./App.css";
 import { ARCanvas, DefaultXRControllers, Hands, useXR } from "@react-three/xr";
-import { useControls } from "leva";
+import { Leva } from "leva";
 import { useState } from "react";
 import { Physics } from "@react-three/cannon";
 import styled from "styled-components/macro";
 import { useWindowSize } from "react-use";
-import { Player } from "./Player";
-import { Cube, Cubes } from "./Cube";
-import { PlaceableBlock } from "./PlaceableBlock";
+import { Player } from "./components/Player";
+import { Cube, Cubes } from "./components/Cubes";
+import { PlaceableBlock } from "./components/PlaceableBlock";
 
 export default function App() {
   const [count, setCount] = useState(0);
@@ -18,22 +18,26 @@ export default function App() {
 
   const { height, width } = useWindowSize();
   return (
-    <AppStyles className="App">
-      <header className="App-header">
-        <div className="cta">Click "Start AR" 👇</div>
-        <ARCanvas
-          sessionInit={{ requiredFeatures: ["hit-test"] }}
-          style={{
-            width,
-            height,
-          }}
-        >
-          <DefaultXRControllers />
-          <Hands />
-          <Scene />
-        </ARCanvas>
-      </header>
-    </AppStyles>
+    <>
+      <AppStyles className="App">
+        <header className="App-header">
+          <div className="cta">Click "Start AR" 👇</div>
+
+          <ARCanvas
+            sessionInit={{ requiredFeatures: ["hit-test"] }}
+            style={{
+              width,
+              height,
+            }}
+          >
+            <DefaultXRControllers />
+            <Hands />
+            <Scene />
+          </ARCanvas>
+        </header>
+      </AppStyles>
+      {process.env.NODE_ENV === "development" && <Leva />}
+    </>
   );
 }
 
@@ -50,17 +54,16 @@ const AppStyles = styled.div`
 
 function Scene() {
   const { px, py, pz } = { px: -2.15, py: 5, pz: 0.1 };
-  const { x, y, z } = useControls({ x: 0, y: -1, z: -1 });
   return (
     <>
       <ambientLight intensity={0.4} />
-      <PlaceableBlock />
+      {/* <PlaceableBlock /> */}
       <directionalLight position={[px, py, pz]} intensity={4} />
       <Physics gravity={[0, -30, 0]}>
         <Player />
-        <Cube position={[0, 0.5, -10]} />
-        <Cubes />
       </Physics>
+      <Cubes />
+      <PlaceableBlock />
     </>
   );
 }

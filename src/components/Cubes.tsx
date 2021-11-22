@@ -1,8 +1,9 @@
-import { useCallback, useState } from "react";
-import { useBox } from "@react-three/cannon";
-import { useCubes } from "./store";
+import { useCallback, useRef, useState } from "react";
+// import { useBox } from "@react-three/cannon";
+import { useCubes } from "../store";
+import { BOX_WIDTH } from "../utils/constants";
 
-export function Cube(props) {
+export function Cube({ position }) {
   const [, setCubes] = useCubes();
   const addCube = useCallback(
     (newCube) => {
@@ -10,7 +11,8 @@ export function Cube(props) {
     },
     [setCubes]
   );
-  const [ref] = useBox(() => ({ type: "Static", ...props }));
+  const ref = useRef<any>(null);
+  // const [ref] = useBox(() => ({ type: "Static", ...props }));
   const [hover, set] = useState<any>(null);
   // const texture = useLoader(THREE.TextureLoader, dirt);
   const onMove = useCallback((e) => {
@@ -40,6 +42,7 @@ export function Cube(props) {
       onPointerMove={onMove}
       onPointerOut={onOut}
       onClick={onClick}
+      position={position}
     >
       {[...Array(6)].map((_, index) => (
         <meshStandardMaterial
@@ -49,7 +52,7 @@ export function Cube(props) {
           color={hover === index ? "hotpink" : "white"}
         />
       ))}
-      <boxGeometry />
+      <boxBufferGeometry args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]} />
     </mesh>
   );
 }

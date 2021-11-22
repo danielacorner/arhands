@@ -1,12 +1,11 @@
-import { useControls } from "leva";
 import * as THREE from "three";
 import { useRef, useEffect } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import { useSphere } from "@react-three/cannon";
 import { useWindowSize } from "react-use";
 import { Axe } from "./Axe";
-import { speed, rotation } from "./store";
-import { useEventListener } from "./hooks/useEventListener";
+import { speed, rotation } from "../store";
+import { useEventListener } from "../hooks/useEventListener";
 // import { usePlayerControls } from "./usePlayerControls";
 
 export function Player(props) {
@@ -42,7 +41,7 @@ export function Player(props) {
 
   const { width } = useWindowSize();
   const axx = width / 1000;
-  const { ax, ay, az } = useControls({ ax: 2.54 * axx, ay: -1.35, az: -2.45 });
+  const { ax, ay, az } = { ax: 2.54 * axx, ay: -1.35, az: -2.45 };
 
   useEventListener("click", () => {
     axe.current.children[0].rotation.x = -0.5;
