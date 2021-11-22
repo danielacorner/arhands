@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { useGeolocation } from "react-use";
 import { Icon } from "@mui/material";
 import { LocationOff } from "@mui/icons-material";
-import * as THREE from "three";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
 
@@ -61,8 +60,10 @@ export function PlaceableBlock() {
   //   ref.current.rotation = heading;
   // });
 
+  //! ? reposition the block on interval according to camera position?
+
   return loading ? (
-    <Html>
+    <Html ref={ref}>
       <Icon>
         <LocationOff />
       </Icon>
