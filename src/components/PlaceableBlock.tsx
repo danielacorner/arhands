@@ -1,12 +1,12 @@
 import {
   Interactive,
-  useHitTest,
+  // useHitTest,
   useInteraction,
-  useXRFrame,
+  // useXRFrame,
 } from "@react-three/xr";
 import { Box, Html } from "@react-three/drei";
-import { useRef, useState } from "react";
-import { useGeolocation, useInterval } from "react-use";
+import { useEffect, useRef, useState } from "react";
+import { useGeolocation /* , useInterval */ } from "react-use";
 import { Icon } from "@mui/material";
 import { LocationOff } from "@mui/icons-material";
 import { useCubes } from "../store";
@@ -28,7 +28,7 @@ export function PlaceableBlock() {
   //   // console.log("🌟🚨 ~ useHitTest ~ nextPosition", nextPosition);
 
   //   // move to nearest grid position after hit test
-  //   // const newPosition = getNearestGridPosition(ref.current.position);
+  //   // const newPosition = getNearestPlaceablePosition(ref.current.position);
   //   // console.log("🌟🚨 ~ useHitTest ~ newPosition", newPosition);
   //   // ref.current.position = newPosition;
   // });
@@ -68,7 +68,7 @@ export function PlaceableBlock() {
 
   //   // ...
   //   // ...finally, we can find the nearest position in our grid
-  //   // const newPosition = getNearestGridPosition(ref.current.position);
+  //   // const newPosition = getNearestPlaceablePosition(ref.current.position);
 
   //   // ref.current.position = newPosition;
 
@@ -79,29 +79,29 @@ export function PlaceableBlock() {
   // });
 
   const { camera } = useThree();
-  useXRFrame((time: number, xrFrame) => {
-    console.log("🌟🚨 ~ useXRFrame ~ xrFrame", xrFrame);
-    // const seconds = time / 1000;
-    // const go = () % 1 === 0;
-    console.log("🌟🚨 ~ useXRtime ~ time", time);
-    if (!ref.current) {
-      return;
-    }
-    const newPosition = [
-      camera.position.x,
-      camera.position.y,
-      camera.position.z - 2,
-    ];
-    console.log("🌟🚨 ~ useXRFrame ~ newPosition", newPosition);
-    ref.current.position.set(newPosition);
-  });
+  // useXRFrame((time: number, xrFrame) => {
+  //   console.log("🌟🚨 ~ useXRFrame ~ xrFrame", xrFrame);
+  //   // const seconds = time / 1000;
+  //   // const go = () % 1 === 0;
+  //   console.log("🌟🚨 ~ useXRtime ~ time", time);
+  //   if (!ref.current) {
+  //     return;
+  //   }
+  //   const newPosition = [
+  //     camera.position.x,
+  //     camera.position.y,
+  //     camera.position.z - 2,
+  //   ];
+  //   console.log("🌟🚨 ~ useXRFrame ~ newPosition", newPosition);
+  //   ref.current.position.set(newPosition);
+  // });
 
   // useInterval(() => {
   //   if (!ref.current) {
   //     return;
   //   }
 
-  //   const newPosition = getNearestGridPosition([
+  //   const newPosition = getNearestPlaceablePosition([
   //     camera.position.x - 0.1,
   //     camera.position.y + 0.1,
   //     camera.position.z + 1,
@@ -118,7 +118,7 @@ export function PlaceableBlock() {
       return;
     }
     console.log("🚨 ~ HitTestExample ~ handleSelect");
-    const newPosition = getNearestGridPosition(ref.current.position);
+    const newPosition = getNearestPlaceablePosition(ref.current.position);
     console.log("🌟🚨 ~ handleSelect ~ newPosition", newPosition);
     const newCube = { position: newPosition };
     const alreadyExists =
@@ -132,18 +132,19 @@ export function PlaceableBlock() {
   };
 
   const {
-    altitude,
-    latitude,
-    longitude,
     loading,
-    heading,
     // altitude: 92.88787898420597
     // heading: 241.7476043701172
     // latitude: 44.8871892
     // loading: false
     // longitude: -76.010453
   } = useGeolocation();
-  console.log("🌟🚨 ~ PlaceableBlock ~ loading", loading);
+  const nearestGridPosition = useNearestPlaceablePosition();
+  console.log("🌟🚨 ~ PlaceableBlock ~ camera.position", camera.position);
+  console.log(
+    "🌟🚨 ~ PlaceableBlock ~ nearestGridPosition",
+    nearestGridPosition
+  );
   // useXRFrame((time, xrFrame) => {
   //   if (!ref.current) {
   //     return;
@@ -189,6 +190,7 @@ export function PlaceableBlock() {
         <Box
           ref={ref}
           // position={[0, 0, 0]}
+          position={nearestGridPosition}
           args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]}
           material-transparent={true}
           material-opacity={0.5}
@@ -200,9 +202,40 @@ export function PlaceableBlock() {
   );
 }
 
-function getNearestGridPosition([a, b, c]) {
-  const x = Math.round(a / BOX_WIDTH) * BOX_WIDTH;
-  const y = Math.round(b / BOX_WIDTH) * BOX_WIDTH;
-  const z = Math.round(c / BOX_WIDTH) * BOX_WIDTH;
-  return [x, y, z];
+// const SCENE_WIDTH_IN_BOXES = 100;
+function useNearestPlaceablePosition() {
+  // take altitude,latitude,longitude as x,y,z ...
+  const { altitude: y, latitude: x, longitude: z } = useGeolocation();
+  const placeableBlockPosition = [x, y, z - 2];
+  const newPosition = getNearestPlaceablePosition(placeableBlockPosition);
+
+  const [nearestPlaceablePosition, setNearestPlaceablePosition] = useState<
+    [number, number, number] | number[]
+  >(getNearestPlaceablePosition([x, y, z]));
+
+  // const { camera } = useThree();
+  useEffect(() => {
+    console.log("🌟🚨 ~ useEffect ~ newPosition", newPosition);
+    setNearestPlaceablePosition(newPosition);
+  }, [newPosition]);
+  // useXRFrame(() => {
+  //   //! too fast?
+  //   console.log("🌟🚨 ~ useXRFrame ~ newPosition", newPosition);
+  //   setNearestPlaceablePosition(newPosition);
+  // });
+
+  return nearestPlaceablePosition;
+}
+
+function getNearestPlaceablePosition(
+  position: [number, number, number] | number[]
+) {
+  const [x, y, z] = position;
+  const xInBoxes = Math.round(x / BOX_WIDTH);
+  const yInBoxes = Math.round(y / BOX_WIDTH);
+  const zInBoxes = Math.round(z / BOX_WIDTH);
+  const nearestX = xInBoxes * BOX_WIDTH;
+  const nearestY = yInBoxes * BOX_WIDTH;
+  const nearestZ = zInBoxes * BOX_WIDTH;
+  return [nearestX, nearestY, nearestZ];
 }
