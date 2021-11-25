@@ -21,7 +21,10 @@ export const moveFieldByKey = (key) => keys[key];
 export const rotation = new THREE.Vector3();
 export const speed = new THREE.Vector3();
 
-export type CubeType = { position: [number, number, number] | number[] };
+export type CubeType = {
+  position: [number, number, number] | number[];
+  geolocation: { altitude: number; latitude: number; longitude: number };
+};
 export const cubesAtom = atomWithStorage<CubeType[]>("cubes", []);
 export const useCubes = () => {
   return useAtom(cubesAtom);

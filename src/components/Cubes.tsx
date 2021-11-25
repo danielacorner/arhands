@@ -1,7 +1,9 @@
 import { useCallback, useRef, useState } from "react";
-// import { useBox } from "@react-three/cannon";
+import { useGeolocation } from "react-use";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
+import { useGetPositionFromGeolocation } from "./PlaceableBlock";
+import { useEffectOnce } from "./useEffectOnce";
 
 export function Cube({ position }) {
   const [, setCubes] = useCubes();
@@ -59,6 +61,8 @@ export function Cube({ position }) {
 export function Cubes() {
   const [cubes] = useCubes();
 
+  useRecalculateCubePositionsWhenWeGetGeolocation();
+
   return (
     <>
       {cubes.map(({ position }, index) => (
@@ -66,4 +70,29 @@ export function Cubes() {
       ))}
     </>
   );
+}
+
+function useRecalculateCubePositionsWhenWeGetGeolocation() {
+  const [, setCubes] = useCubes();
+
+  // when we get the geolocation,
+  // re-derive any stored cube positions in the scene
+  const { heading } = useGeolocation();
+  const getPositionFromGeolocation = useGetPositionFromGeolocation();
+  useEffectOnce({
+    callback: () => {
+      setCubes((prevCubes) =>
+        prevCubes.map((cube) => {
+          const position = getPositionFromGeolocation(cube.geolocation);
+          console.log("🌟🚨 ~ prevCubes.map ~ position", position);
+          return {
+            ...cube,
+            position,
+          };
+        })
+      );
+    },
+    shouldRun: Boolean(heading),
+    dependencies: [heading],
+  });
 }

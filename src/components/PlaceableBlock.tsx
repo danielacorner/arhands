@@ -5,7 +5,7 @@ import {
   // useXRFrame,
 } from "@react-three/xr";
 import { Box, Html } from "@react-three/drei";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useGeolocation /* , useInterval */ } from "react-use";
 import { Icon } from "@mui/material";
 import { LocationOff } from "@mui/icons-material";
@@ -112,7 +112,17 @@ export function PlaceableBlock() {
 
   const [isHovered, setIsHovered] = useState(false);
   const [cubes, setCubes] = useCubes();
-
+  const {
+    loading,
+    // loading: false
+    // heading: 241.7476043701172
+    // altitude: 92.88787898420597
+    // longitude: -76.010453
+    // latitude: 44.8871892
+    altitude,
+    longitude,
+    latitude,
+  } = useGeolocation();
   const handleSelect = () => {
     if (!ref.current) {
       return;
@@ -120,7 +130,10 @@ export function PlaceableBlock() {
     console.log("🚨 ~ HitTestExample ~ handleSelect");
     const newPosition = getNearestPlaceablePosition(ref.current.position);
     console.log("🌟🚨 ~ handleSelect ~ newPosition", newPosition);
-    const newCube = { position: newPosition };
+    const newCube = {
+      position: newPosition,
+      geolocation: { altitude, latitude, longitude },
+    };
     const alreadyExists =
       Array.from(new Set([...cubes, newCube])).length === cubes.length;
 
@@ -131,14 +144,6 @@ export function PlaceableBlock() {
     setCubes((prevCubes) => [...prevCubes, newCube]);
   };
 
-  const {
-    loading,
-    // altitude: 92.88787898420597
-    // heading: 241.7476043701172
-    // latitude: 44.8871892
-    // loading: false
-    // longitude: -76.010453
-  } = useGeolocation();
   const nearestGridPosition = useNearestPlaceablePosition();
   console.log("🌟🚨 ~ PlaceableBlock ~ camera.position", camera.position);
   console.log(
@@ -202,6 +207,48 @@ export function PlaceableBlock() {
   );
 }
 
+// store the block's geolocation in CubeType
+// -> derive the threejs [x,y,z] position relative to the camera + heading
+
+// in threejs ar [1,1,1] === [1 meter, 1 meter, 1 meter]
+
+export function useGetPositionFromGeolocation() {
+  // 1. get geolocation
+  const { latitude, longitude, altitude } = useGeolocation();
+  // 2. get block geolocation
+  return useCallback(
+    (blockGeolocation: {
+      latitude: number;
+      longitude: number;
+      altitude: number;
+    }) => {
+      // 3. get x,y,z distances between geolocations in meters
+      const {
+        x: userX,
+        y: userY,
+        z: userZ,
+      } = getGeolocationInMeters({ latitude, longitude, altitude });
+      const {
+        x: blockX,
+        y: blockY,
+        z: blockZ,
+      } = getGeolocationInMeters({
+        latitude: blockGeolocation.latitude,
+        longitude: blockGeolocation.longitude,
+        altitude: blockGeolocation.altitude,
+      });
+
+      const x = blockX - userX;
+      const y = blockY - userY;
+      const z = blockZ - userZ;
+      const blockPositionInScene = [x, y, z];
+      return blockPositionInScene;
+    },
+    [latitude, longitude, altitude]
+  );
+}
+// function useCameraPositionFromGeolocation
+
 function useNearestPlaceablePosition() {
   // take altitude,latitude,longitude as x,y,z ...
   const [x, y, z] = useCameraPositionFromGeolocation();
@@ -225,10 +272,10 @@ function useNearestPlaceablePosition() {
   return nearestPlaceablePosition;
 }
 
-/** convert geolocation to canvas camera position...
- * ...which is the same as the camera position in the scene
+/** convert geolocation to canvas camera position
  */
 function useCameraPositionFromGeolocation() {
+  // heading = degrees how far off from heading due north the device is pointing
   const { heading } = useGeolocation();
   const [x, y, z] = useGeolocationInMeters();
   console.log("🌟🚨 ~ useCameraPositionFromGeolocation ~ [x, y, z]", [x, y, z]);
@@ -252,13 +299,26 @@ const METERS_PER_DEGREE_LATITUDE = 111132.92;
 // const METERS_PER_DEGREE_ALTITUDE = 111132.92;
 const useGeolocationInMeters = () => {
   const { altitude, latitude, longitude } = useGeolocation();
+  const { x, y, z } = getGeolocationInMeters({ latitude, longitude, altitude });
+  return [x, y, z];
+};
+
+function getGeolocationInMeters({
+  latitude,
+  longitude,
+  altitude,
+}: {
+  latitude: number;
+  longitude: number;
+  altitude: number;
+}) {
   const metersPerDegreeLongitude =
     Math.cos(latitude) * METERS_PER_DEGREE_LATITUDE;
   const x = longitude * metersPerDegreeLongitude;
   const y = altitude;
   const z = latitude * METERS_PER_DEGREE_LATITUDE;
-  return [x, y, z];
-};
+  return { x, y, z };
+}
 
 function getNearestPlaceablePosition(
   position: [number, number, number] | number[]
