@@ -4,6 +4,7 @@ import { ARCanvas, DefaultXRControllers, Hands, useXR } from "@react-three/xr";
 import { Leva } from "leva";
 import { useState } from "react";
 import { Physics } from "@react-three/cannon";
+import { Canvas } from "@react-three/fiber";
 import styled from "styled-components/macro";
 import { useWindowSize } from "react-use";
 import { Player } from "./components/Player";
@@ -30,8 +31,8 @@ export default function App() {
               height,
             }}
           >
-            <DefaultXRControllers />
-            <Hands />
+            {/* <DefaultXRControllers />
+            <Hands /> */}
             <Scene />
           </ARCanvas>
         </header>

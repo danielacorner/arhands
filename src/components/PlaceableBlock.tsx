@@ -1,7 +1,7 @@
 import {
   Interactive,
   // useHitTest,
-  useInteraction,
+  // useInteraction,
   // useXRFrame,
 } from "@react-three/xr";
 import { Box, Html } from "@react-three/drei";
@@ -163,7 +163,7 @@ export function PlaceableBlock() {
   //   ref.current.rotation = heading;
   // });
 
-  useInteraction(ref, "onSelect", () => console.log("selected!"));
+  // useInteraction(ref, "onSelect", () => console.log("selected!"));
 
   return (
     <>
@@ -261,8 +261,10 @@ function useNearestPlaceablePosition() {
   // const { camera } = useThree();
   useEffect(() => {
     console.log("🌟🚨 ~ useEffect ~ newPosition", newPosition);
-    setNearestPlaceablePosition(newPosition);
-  }, [newPosition]);
+    if (!isArrayEqual(newPosition, nearestPlaceablePosition)) {
+      setNearestPlaceablePosition(newPosition);
+    }
+  }, [newPosition, nearestPlaceablePosition]);
   // useXRFrame(() => {
   //   //! too fast?
   //   console.log("🌟🚨 ~ useXRFrame ~ newPosition", newPosition);
@@ -270,6 +272,10 @@ function useNearestPlaceablePosition() {
   // });
 
   return nearestPlaceablePosition;
+}
+
+function isArrayEqual(arr1: any[], arr2: any[]) {
+  return arr1.every((item, index) => item === arr2[index]);
 }
 
 /** convert geolocation to canvas camera position
