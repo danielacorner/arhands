@@ -5,7 +5,7 @@ import { BOX_WIDTH } from "../utils/constants";
 import { useGetPositionFromGeolocation } from "./PlaceableBlock";
 import { useEffectOnce } from "../hooks/useEffectOnce";
 
-export function Cube({ position }) {
+export function Cube({ position, materialProps = {} }) {
   const [, setCubes] = useCubes();
 
   const ref = useRef<any>(null);
@@ -51,7 +51,8 @@ export function Cube({ position }) {
           attachArray="material"
           key={index}
           // map={texture}
-          color={hover === index ? "hotpink" : "white"}
+          {...materialProps}
+          // color={hover === index ? "hotpink" : "white"}
         />
       ))}
       <boxBufferGeometry args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]} />
@@ -71,6 +72,12 @@ export function Cubes() {
         .map(({ position }, index) => (
           <Cube key={index} position={position} />
         ))}
+      {/* reference cubes */}
+      <Cube position={[0, 0, -1]} materialProps={{ color: "cornflowerblue" }} />
+      <Cube position={[0, 0, 0]} materialProps={{ color: "steelblue" }} />
+      <Cube position={[0, 1, 0]} materialProps={{ color: "steelblue" }} />
+      <Cube position={[0, 0, 2]} materialProps={{ color: "limegreen" }} />
+      <Cube position={[0, 0, 5]} materialProps={{ color: "tomato" }} />
     </>
   );
 }

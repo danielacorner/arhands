@@ -16,6 +16,7 @@ import {
   useGeolocationInMeters,
 } from "./METERS_PER_DEGREE_LATITUDE";
 import { useCameraPositionFromGeolocation } from "../hooks/useCameraPositionFromGeolocation";
+import isEqual from "lodash.isequal";
 
 export function PlaceableBlock() {
   const ref = useRef<any>(null);
@@ -126,11 +127,12 @@ export function PlaceableBlock() {
       position: newPosition,
       geolocation: { altitude, latitude, longitude },
     };
-    const alreadyExists =
-      Array.from(new Set([...cubes, newCube])).length === cubes.length;
+    const alreadyExists = cubes.find((c) => isEqual(newCube, c));
 
     if (alreadyExists) {
       console.log("🌟🚨 ~ handleSelect ~ alreadyExists", alreadyExists);
+      // delete the cube?!?!?
+      setCubes((prevCubes) => prevCubes.filter((p) => !isEqual(p, newCube)));
       return;
     }
     setCubes((prevCubes) => [...prevCubes, newCube]);
