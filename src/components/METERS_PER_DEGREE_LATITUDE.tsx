@@ -1,5 +1,4 @@
 import { useGeolocation /* , useInterval */ } from "react-use";
-import { BOX_WIDTH } from "../utils/constants";
 
 // https://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
 const METERS_PER_DEGREE_LATITUDE = 111132.92;
@@ -19,9 +18,11 @@ export function getGeolocationInMeters({
   longitude: number;
   altitude: number;
 }) {
-  const metersPerDegreeLongitude =
-    Math.cos(latitude) * METERS_PER_DEGREE_LATITUDE;
-  const x = longitude * metersPerDegreeLongitude;
+  // TODO: incorrect formula?
+  // const metersPerDegreeLongitude =
+  //   Math.cos(latitude) * METERS_PER_DEGREE_LATITUDE;
+  const x = longitude * METERS_PER_DEGREE_LATITUDE;
+  // const x = longitude * metersPerDegreeLongitude;
   const y = altitude;
   const z = latitude * METERS_PER_DEGREE_LATITUDE;
   return { x, y, z };

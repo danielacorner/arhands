@@ -11,7 +11,10 @@ import { Icon } from "@mui/material";
 import { LocationOff } from "@mui/icons-material";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
-import { getGeolocationInMeters } from "./METERS_PER_DEGREE_LATITUDE";
+import {
+  getGeolocationInMeters,
+  useGeolocationInMeters,
+} from "./METERS_PER_DEGREE_LATITUDE";
 import { useCameraPositionFromGeolocation } from "../hooks/useCameraPositionFromGeolocation";
 
 export function PlaceableBlock() {
@@ -26,11 +29,9 @@ export function PlaceableBlock() {
   //     ref.current.rotation,
   //     ref.current.scale
   //   );
-  //   // console.log("🌟🚨 ~ useHitTest ~ nextPosition", nextPosition);
 
   //   // move to nearest grid position after hit test
   //   // const newPosition = getNearestPlaceablePosition(ref.current.position);
-  //   // console.log("🌟🚨 ~ useHitTest ~ newPosition", newPosition);
   //   // ref.current.position = newPosition;
   // });
 
@@ -73,17 +74,11 @@ export function PlaceableBlock() {
 
   //   // ref.current.position = newPosition;
 
-  //   console.log(
-  //     "🌟🚨 ~ useHitTest ~ ref.current.rotation",
-  //     ref.current.rotation
-  //   );
   // });
 
   // useXRFrame((time: number, xrFrame) => {
-  //   console.log("🌟🚨 ~ useXRFrame ~ xrFrame", xrFrame);
   //   // const seconds = time / 1000;
   //   // const go = () % 1 === 0;
-  //   console.log("🌟🚨 ~ useXRtime ~ time", time);
   //   if (!ref.current) {
   //     return;
   //   }
@@ -92,7 +87,6 @@ export function PlaceableBlock() {
   //     camera.position.y,
   //     camera.position.z - 2,
   //   ];
-  //   console.log("🌟🚨 ~ useXRFrame ~ newPosition", newPosition);
   //   ref.current.position.set(newPosition);
   // });
 
@@ -107,7 +101,6 @@ export function PlaceableBlock() {
   //     camera.position.z + 1,
   //   ]);
   //   ref.current.position.set(newPosition);
-  //   console.log("🌟🚨 ~ useXRFrame ~ newPosition", newPosition);
   // }, 1000);
 
   const [isHovered, setIsHovered] = useState(false);
@@ -127,7 +120,6 @@ export function PlaceableBlock() {
     if (!ref.current) {
       return;
     }
-    console.log("🚨 ~ HitTestExample ~ handleSelect");
     const newPosition = getNearestPlaceablePosition(ref.current.position);
     console.log("🌟🚨 ~ handleSelect ~ newPosition", newPosition);
     const newCube = {
@@ -147,12 +139,18 @@ export function PlaceableBlock() {
   // TODO!!!!!!!!!!!!!!!!
   const nearestPlaceablePosition = useNearestPlaceablePosition();
 
+  const geolocationMeters = useGeolocationInMeters();
+  const cubePosition = [
+    nearestPlaceablePosition[0] - geolocationMeters[0],
+    nearestPlaceablePosition[1] - geolocationMeters[1],
+    nearestPlaceablePosition[2] - geolocationMeters[2] - 5,
+  ];
+  console.log("🌟🚨 ~ Cube ~ cubePosition", cubePosition);
   // useXRFrame((time, xrFrame) => {
   //   if (!ref.current) {
   //     return;
   //   }
   //   const newRotation = THREE.MathUtils.degToRad(heading);
-  //   console.log("🌟🚨 ~ useXRFrame ~ newRotation", newRotation);
   //   ref.current.rotation = newRotation;
   // });
 
@@ -192,7 +190,7 @@ export function PlaceableBlock() {
         <Box
           ref={ref}
           // position={[0, 0, 0]}
-          position={nearestPlaceablePosition}
+          position={cubePosition}
           args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]}
           material-transparent={true}
           material-opacity={0.5}
@@ -251,39 +249,47 @@ export function useGetPositionFromGeolocation() {
 
 /** get the position that the placeable block can currently be placed in */
 function useNearestPlaceablePosition() {
+  const [nearest, setNearest] = useState<[number, number, number] | number[]>([
+    0, 0, 0,
+  ]);
+
   // take altitude,latitude,longitude as x,y,z ...
   // this is the user's initial position on Earth, in meters
   const [x, y, z] = useCameraPositionFromGeolocation();
 
   // the new placeable position
-  const newPosition = getNearestPlaceablePosition([x, y, z + 4]);
-
-  const [nearestPlaceablePosition, setNearestPlaceablePosition] = useState<
-    [number, number, number] | number[]
-  >(getNearestPlaceablePosition([x, y, z + 4]));
-  // const { camera } = useThree();
+  const newPosition = getNearestPlaceablePosition([x, y, z]);
 
   // set the nearest placeable position as you move around
   useEffect(() => {
-    const shouldSet = !isArrayEqual(newPosition, nearestPlaceablePosition);
+    const distanceBetweenPoints = getDistanceBetweenPoints(
+      newPosition,
+      nearest
+    );
+    console.log(
+      "🌟🚨 ~ useEffect ~ distanceBetweenPoints",
+      distanceBetweenPoints
+    );
+    console.log(
+      "🌟🚨 ~ useEffect ~ blocksBetweenPoints",
+      distanceBetweenPoints / BOX_WIDTH
+    );
+    const shouldSet =
+      !isArrayEqual(newPosition, nearest) && distanceBetweenPoints > BOX_WIDTH;
     if (shouldSet) {
-      console.log("🌟🚨 ~ nearestPlaceablePosition", nearestPlaceablePosition);
+      console.log("🌟🌟🚨🚨 ~ nearestPlac", nearest);
       console.log("🌟🌟🚨🚨 ~ newPosition", newPosition);
-      console.log(
-        "🌟🌟🌟🚨🚨🚨 ~ distanceBetweenPoints(newPosition, nearestPlaceablePosition)",
-        distanceBetweenPoints(newPosition, nearestPlaceablePosition)
-      );
-      setNearestPlaceablePosition(newPosition);
+      setNearest(newPosition);
     }
-  }, [newPosition, nearestPlaceablePosition]);
+  }, [newPosition, nearest]);
   // useXRFrame(() => {
   //   //! too fast?
-  //   setNearestPlaceablePosition(newPosition);
+  //   setNearest(newPosition);
   // });
 
-  return nearestPlaceablePosition;
+  return [nearest[0], nearest[1], nearest[2] + 4];
 }
-const distanceBetweenPoints = (
+const getDistanceBetweenPoints = (
   a: [number, number, number] | number[],
   b: [number, number, number] | number[]
 ) => {
@@ -297,11 +303,9 @@ function isArrayEqual(arr1: any[], arr2: any[]) {
   return arr1.every((item, index) => item === arr2[index]);
 }
 
-function getNearestPlaceablePosition(
-  position: [number, number, number] | number[]
-) {
-  const [x, y, z] = position;
-
+function getNearestPlaceablePosition([x, y, z]:
+  | [number, number, number]
+  | number[]) {
   // round to the nearest box
   return [
     Math.round(x / BOX_WIDTH) * BOX_WIDTH,

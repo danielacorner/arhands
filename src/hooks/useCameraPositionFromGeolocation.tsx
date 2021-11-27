@@ -6,11 +6,12 @@ import { useGeolocationInMeters } from "../components/METERS_PER_DEGREE_LATITUDE
 
 export function useCameraPositionFromGeolocation() {
   // heading = degrees how far off from heading due north the device is pointing
-  const { heading } = useGeolocation();
-  const [x, y, z] = useGeolocationInMeters();
-  // need to rotate the scene to match the camera heading
-  const [xRotated, yRotated, zRotated] = rotatePoint([x, y, z], heading);
-  return [xRotated, yRotated, zRotated];
+  // const { heading } = useGeolocation();
+  // const [x, y, z] = useGeolocationInMeters();
+  // // need to rotate the scene to match the camera heading
+  // const [xRotated, yRotated, zRotated] = rotatePoint([x, y, z], heading);
+  // return [xRotated, yRotated, zRotated];
+  return useGeolocationInMeters();
 }
 function rotatePoint(point: [number, number, number], angle: number) {
   const [x, y, z] = point;

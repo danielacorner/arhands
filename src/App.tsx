@@ -2,7 +2,6 @@
 import "./App.css";
 import { ARCanvas, useXR } from "@react-three/xr";
 import { Leva } from "leva";
-import { useState } from "react";
 import { Physics } from "@react-three/cannon";
 import styled from "styled-components/macro";
 import { useWindowSize } from "react-use";
@@ -14,10 +13,7 @@ import { useInitialPosition } from "./store";
 import { useCameraPositionFromGeolocation } from "./hooks/useCameraPositionFromGeolocation";
 
 export default function App() {
-  const [count, setCount] = useState(0);
-  const { controllers, player } = useXR();
-  console.log("🌟🚨 ~ App ~ player", player);
-  console.log("🌟🚨 ~ App ~ controllers", controllers);
+  // const { controllers, player } = useXR();
   useStoreInitialGeolocation();
   const { height, width } = useWindowSize();
   return (

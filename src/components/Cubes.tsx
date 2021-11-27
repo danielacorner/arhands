@@ -7,12 +7,7 @@ import { useEffectOnce } from "../hooks/useEffectOnce";
 
 export function Cube({ position }) {
   const [, setCubes] = useCubes();
-  const addCube = useCallback(
-    (newCube) => {
-      setCubes((prev) => [...prev, newCube]);
-    },
-    [setCubes]
-  );
+
   const ref = useRef<any>(null);
   // const [ref] = useBox(() => ({ type: "Static", ...props }));
   const [hover, set] = useState<any>(null);
@@ -22,6 +17,7 @@ export function Cube({ position }) {
     set(Math.floor(e.faceIndex / 2));
   }, []);
   const onOut = useCallback(() => set(null), []);
+  const { altitude, latitude, longitude } = useGeolocation();
   const onClick = useCallback(
     (e) => {
       console.log("🌟🚨 ~ Cube ~ e", e);
@@ -31,11 +27,15 @@ export function Cube({ position }) {
       e.stopPropagation();
       const { x, y, z } = ref.current.position;
       const dir = [[x + 1, y, z], [x - 1, y, z], [x, y + 1, z], [x, y - 1, z], [x, y, z + 1], [x, y, z - 1]]; // prettier-ignore
-      const newCube = { position: dir[Math.floor(e.faceIndex / 2)] as any };
-      addCube(newCube);
+      const newCube = {
+        position: dir[Math.floor(e.faceIndex / 2)] as any,
+        geolocation: { altitude, latitude, longitude },
+      };
+      setCubes((prev) => [...prev, newCube]);
     },
-    [addCube, ref]
+    [setCubes, altitude, latitude, longitude, ref]
   );
+
   return (
     <mesh
       ref={ref}
@@ -60,20 +60,23 @@ export function Cube({ position }) {
 }
 export function Cubes() {
   const [cubes] = useCubes();
+  console.log("🟩🚨 ~ Cubes ~ cubes", cubes);
 
   useRecalculateCubePositionsWhenWeGetGeolocation();
 
   return (
     <>
-      {cubes.map(({ position }, index) => (
-        <Cube key={index} position={position} />
-      ))}
+      {cubes
+        .filter((c) => c.position)
+        .map(({ position }, index) => (
+          <Cube key={index} position={position} />
+        ))}
     </>
   );
 }
 
 function useRecalculateCubePositionsWhenWeGetGeolocation() {
-  const [, setCubes] = useCubes();
+  const [cubes, setCubes] = useCubes();
 
   // when we get the geolocation,
   // re-derive any stored cube positions in the scene
@@ -92,7 +95,7 @@ function useRecalculateCubePositionsWhenWeGetGeolocation() {
         })
       );
     },
-    shouldRun: Boolean(heading),
-    dependencies: [heading],
+    shouldRun: Boolean(heading) && cubes.length > 0,
+    dependencies: [heading, cubes],
   });
 }
