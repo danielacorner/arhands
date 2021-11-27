@@ -3,7 +3,7 @@ import { useGeolocation } from "react-use";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
 import { useGetPositionFromGeolocation } from "./PlaceableBlock";
-import { useEffectOnce } from "./useEffectOnce";
+import { useEffectOnce } from "../hooks/useEffectOnce";
 
 export function Cube({ position }) {
   const [, setCubes] = useCubes();

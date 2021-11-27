@@ -29,6 +29,12 @@ export const cubesAtom = atomWithStorage<CubeType[]>("cubes", []);
 export const useCubes = () => {
   return useAtom(cubesAtom);
 };
+export const initialPositionAtom = atomWithStorage<
+  number[] | [number, number, number]
+>("initialPosition", []);
+export const useInitialPosition = () => {
+  return useAtom(cubesAtom);
+};
 
 // const ydoc = new Y.Doc();
 // const ymap = ydoc.getMap("map");

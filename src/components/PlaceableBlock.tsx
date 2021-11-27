@@ -12,6 +12,11 @@ import { LocationOff } from "@mui/icons-material";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
 import { useThree } from "@react-three/fiber";
+import { useCameraPositionFromGeolocation } from "../hooks/useCameraPositionFromGeolocation";
+import {
+  getNearestPlaceablePosition,
+  getGeolocationInMeters,
+} from "./METERS_PER_DEGREE_LATITUDE";
 
 export function PlaceableBlock() {
   const ref = useRef<any>(null);
@@ -144,12 +149,9 @@ export function PlaceableBlock() {
     setCubes((prevCubes) => [...prevCubes, newCube]);
   };
 
-  const nearestGridPosition = useNearestPlaceablePosition();
-  console.log("🌟🚨 ~ PlaceableBlock ~ camera.position", camera.position);
-  console.log(
-    "🌟🚨 ~ PlaceableBlock ~ nearestGridPosition",
-    nearestGridPosition
-  );
+  // TODO!!!!!!!!!!!!!!!!
+  const nearestPlaceablePosition = useNearestPlaceablePosition();
+
   // useXRFrame((time, xrFrame) => {
   //   if (!ref.current) {
   //     return;
@@ -195,7 +197,7 @@ export function PlaceableBlock() {
         <Box
           ref={ref}
           // position={[0, 0, 0]}
-          position={nearestGridPosition}
+          position={nearestPlaceablePosition}
           args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]}
           material-transparent={true}
           material-opacity={0.5}
@@ -252,92 +254,48 @@ export function useGetPositionFromGeolocation() {
 }
 // function useCameraPositionFromGeolocation
 
+/** get the position that the placeable block can currently be placed in */
 function useNearestPlaceablePosition() {
   // take altitude,latitude,longitude as x,y,z ...
+  // this is the user's initial position on Earth, in meters
   const [x, y, z] = useCameraPositionFromGeolocation();
   const newPosition = getNearestPlaceablePosition([x, y, z - 2]);
 
   const [nearestPlaceablePosition, setNearestPlaceablePosition] = useState<
     [number, number, number] | number[]
   >(getNearestPlaceablePosition([x, y, z]));
-
   // const { camera } = useThree();
+
+  // set the nearest placeable position as you move around
   useEffect(() => {
-    console.log("🌟🚨 ~ useEffect ~ newPosition", newPosition);
-    if (!isArrayEqual(newPosition, nearestPlaceablePosition)) {
+    const shouldSet = !isArrayEqual(newPosition, nearestPlaceablePosition);
+    if (shouldSet) {
+      console.log("🌟🚨 ~ nearestPlaceablePosition", nearestPlaceablePosition);
+      console.log("🌟🌟🚨🚨 ~ newPosition", newPosition);
+      console.log(
+        "🌟🌟🌟🚨🚨🚨 ~ distanceBetweenPoints(newPosition, nearestPlaceablePosition)",
+        distanceBetweenPoints(newPosition, nearestPlaceablePosition)
+      );
       setNearestPlaceablePosition(newPosition);
     }
   }, [newPosition, nearestPlaceablePosition]);
   // useXRFrame(() => {
   //   //! too fast?
-  //   console.log("🌟🚨 ~ useXRFrame ~ newPosition", newPosition);
   //   setNearestPlaceablePosition(newPosition);
   // });
 
   return nearestPlaceablePosition;
 }
+const distanceBetweenPoints = (
+  a: [number, number, number] | number[],
+  b: [number, number, number] | number[]
+) => {
+  const x = a[0] - b[0];
+  const y = a[1] - b[1];
+  const z = a[2] - b[2];
+  return Math.sqrt(x * x + y * y + z * z);
+};
 
 function isArrayEqual(arr1: any[], arr2: any[]) {
   return arr1.every((item, index) => item === arr2[index]);
-}
-
-/** convert geolocation to canvas camera position
- */
-function useCameraPositionFromGeolocation() {
-  // heading = degrees how far off from heading due north the device is pointing
-  const { heading } = useGeolocation();
-  const [x, y, z] = useGeolocationInMeters();
-  console.log("🌟🚨 ~ useCameraPositionFromGeolocation ~ [x, y, z]", [x, y, z]);
-  // need to rotate the scene to match the camera heading
-  const [xRotated, yRotated, zRotated] = rotatePoint([x, y, z], heading);
-  return [xRotated, yRotated, zRotated];
-}
-
-function rotatePoint(point: [number, number, number], angle: number) {
-  const [x, y, z] = point;
-  const [xRotated, yRotated, zRotated] = [
-    x * Math.cos(angle) - y * Math.sin(angle),
-    x * Math.sin(angle) + y * Math.cos(angle),
-    z,
-  ];
-  return [xRotated, yRotated, zRotated];
-}
-
-// https://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
-const METERS_PER_DEGREE_LATITUDE = 111132.92;
-// const METERS_PER_DEGREE_ALTITUDE = 111132.92;
-const useGeolocationInMeters = () => {
-  const { altitude, latitude, longitude } = useGeolocation();
-  const { x, y, z } = getGeolocationInMeters({ latitude, longitude, altitude });
-  return [x, y, z];
-};
-
-function getGeolocationInMeters({
-  latitude,
-  longitude,
-  altitude,
-}: {
-  latitude: number;
-  longitude: number;
-  altitude: number;
-}) {
-  const metersPerDegreeLongitude =
-    Math.cos(latitude) * METERS_PER_DEGREE_LATITUDE;
-  const x = longitude * metersPerDegreeLongitude;
-  const y = altitude;
-  const z = latitude * METERS_PER_DEGREE_LATITUDE;
-  return { x, y, z };
-}
-
-function getNearestPlaceablePosition(
-  position: [number, number, number] | number[]
-) {
-  const [x, y, z] = position;
-  const xInBoxes = Math.round(x / BOX_WIDTH);
-  const yInBoxes = Math.round(y / BOX_WIDTH);
-  const zInBoxes = Math.round(z / BOX_WIDTH);
-  const nearestX = xInBoxes * BOX_WIDTH;
-  const nearestY = yInBoxes * BOX_WIDTH;
-  const nearestZ = zInBoxes * BOX_WIDTH;
-  return [nearestX, nearestY, nearestZ];
 }

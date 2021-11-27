@@ -6,17 +6,27 @@ import { useState } from "react";
 import { Physics } from "@react-three/cannon";
 import { Canvas } from "@react-three/fiber";
 import styled from "styled-components/macro";
-import { useWindowSize } from "react-use";
+import {
+  useGeolocation,
+  useGeolocation,
+  useGeolocation,
+  useWindowSize,
+} from "react-use";
 import { Player } from "./components/Player";
 import { Cube, Cubes } from "./components/Cubes";
-import { PlaceableBlock } from "./components/PlaceableBlock";
+import {
+  PlaceableBlock,
+  useGetPositionFromGeolocation,
+} from "./components/PlaceableBlock";
+import { useEffectOnce } from "./hooks/useEffectOnce";
+import { useInitialPosition } from "./store";
 
 export default function App() {
   const [count, setCount] = useState(0);
   const { controllers, player } = useXR();
   console.log("🌟🚨 ~ App ~ player", player);
   console.log("🌟🚨 ~ App ~ controllers", controllers);
-
+  useStoreInitialGeolocation();
   const { height, width } = useWindowSize();
   return (
     <>
@@ -67,4 +77,17 @@ function Scene() {
       <PlaceableBlock />
     </>
   );
+}
+
+/** store the first geolocation we receive */
+function useStoreInitialGeolocation() {
+  const [, setInitialPosition] = useInitialPosition();
+  const initialPosition = useGetPositionFromGeolocation();
+  useEffectOnce({
+    callback: () => {
+      setInitialPosition(initialPosition);
+    },
+    shouldRun: initialPosition[0] !== 0,
+    dependencies: [initialPosition],
+  });
 }
