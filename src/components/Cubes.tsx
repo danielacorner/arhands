@@ -4,6 +4,9 @@ import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
 import { useGetPositionFromGeolocation } from "./PlaceableBlock";
 import { useEffectOnce } from "../hooks/useEffectOnce";
+import { useXRFrame } from "@react-three/xr";
+import { useThree } from "@react-three/fiber";
+import { Sphere } from "@react-three/drei";
 
 export function Cube({ position, materialProps = {} }) {
   const [, setCubes] = useCubes();
@@ -73,12 +76,58 @@ export function Cubes() {
           <Cube key={index} position={position} />
         ))}
       {/* reference cubes */}
-      <Cube position={[0, 0, -1]} materialProps={{ color: "cornflowerblue" }} />
-      <Cube position={[0, 0, 0]} materialProps={{ color: "steelblue" }} />
-      <Cube position={[0, 1, 0]} materialProps={{ color: "steelblue" }} />
-      <Cube position={[0, 0, 2]} materialProps={{ color: "limegreen" }} />
-      <Cube position={[0, 0, 5]} materialProps={{ color: "tomato" }} />
+      <Cube
+        position={[0, 0, -1]}
+        materialProps={{
+          color: "cornflowerblue",
+          transparent: true,
+          opacity: 0.5,
+        }}
+      />
+      <Cube
+        position={[0, 0, 0]}
+        materialProps={{ color: "steelblue", transparent: true, opacity: 0.5 }}
+      />
+      <Cube
+        position={[0, 1, 0]}
+        materialProps={{ color: "steelblue", transparent: true, opacity: 0.5 }}
+      />
+      <Cube
+        position={[0, 0, 2]}
+        materialProps={{ color: "limegreen", transparent: true, opacity: 0.5 }}
+      />
+      <Cube
+        position={[0, 0, 5]}
+        materialProps={{ color: "tomato", transparent: true, opacity: 0.5 }}
+      />
+      <BallTracksCamera />
     </>
+  );
+}
+
+function BallTracksCamera() {
+  const ref = useRef(null as any);
+  const { camera } = useThree();
+  useXRFrame((time, { session, trackedAnchors }) => {
+    if (!ref.current) return;
+    console.log("🌟🚨 ~ BallTracksCamera ~ camera", camera);
+    const newPosition = [
+      camera.position.x,
+      camera.position.y,
+      camera.position.z - 1,
+    ];
+    console.log("🌟🚨 ~ useXRFrame ~ newPosition", newPosition);
+    ref.current.position.set(...newPosition);
+  });
+
+  return (
+    <Sphere
+      ref={ref}
+      material-color="cornflowerblue"
+      material-transparent={true}
+      material-opacity={0.3}
+      args={[BOX_WIDTH / 2]}
+    />
   );
 }
 
