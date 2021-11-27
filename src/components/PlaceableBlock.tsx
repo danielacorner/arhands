@@ -222,6 +222,9 @@ export function useGetPositionFromGeolocation() {
       longitude: number;
       altitude: number;
     }) => {
+      if (!blockGeolocation) {
+        return;
+      }
       // 3. get x,y,z distances between geolocations in meters
       const {
         x: userX,
