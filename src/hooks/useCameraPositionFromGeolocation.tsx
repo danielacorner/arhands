@@ -13,12 +13,3 @@ export function useCameraPositionFromGeolocation() {
   // return [xRotated, yRotated, zRotated];
   return useGeolocationInMeters();
 }
-function rotatePoint(point: [number, number, number], angle: number) {
-  const [x, y, z] = point;
-  const [xRotated, yRotated, zRotated] = [
-    x * Math.cos(angle) - y * Math.sin(angle),
-    x * Math.sin(angle) + y * Math.cos(angle),
-    z,
-  ];
-  return [xRotated, yRotated, zRotated];
-}

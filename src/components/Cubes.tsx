@@ -1,5 +1,6 @@
+import * as THREE from "three";
 import { useCallback, useRef, useState } from "react";
-import { useGeolocation } from "react-use";
+import { useGeolocation, useOrientation } from "react-use";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
 import { useGetPositionFromGeolocation } from "./PlaceableBlock";
@@ -7,6 +8,7 @@ import { useEffectOnce } from "../hooks/useEffectOnce";
 import { useXRFrame } from "@react-three/xr";
 import { useThree } from "@react-three/fiber";
 import { Sphere } from "@react-three/drei";
+import { rotatePoint } from "../hooks/rotatePoint";
 
 export function Cube({ position, materialProps = {} }) {
   const [, setCubes] = useCubes();
@@ -101,6 +103,7 @@ export function Cubes() {
         materialProps={{ color: "tomato", transparent: true, opacity: 0.5 }}
       />
       <BallTracksCamera />
+      <BallTracksCameraAndHeading />
     </>
   );
 }
@@ -110,13 +113,13 @@ function BallTracksCamera() {
   const { camera } = useThree();
   useXRFrame((time, { session, trackedAnchors }) => {
     if (!ref.current) return;
-    console.log("🌟🚨 ~ BallTracksCamera ~ camera", camera);
     const newPosition = [
       camera.position.x,
       camera.position.y,
       camera.position.z - 1,
     ];
-    console.log("🌟🚨 ~ useXRFrame ~ newPosition", newPosition);
+    // console.log("🌟🚨 ~ BallTracksCamera ~ camera", camera);
+    // console.log("🌟🚨 ~ useXRFrame ~ newPosition", newPosition);
     ref.current.position.set(...newPosition);
   });
 
@@ -124,6 +127,42 @@ function BallTracksCamera() {
     <Sphere
       ref={ref}
       material-color="cornflowerblue"
+      material-transparent={true}
+      material-opacity={0.3}
+      args={[BOX_WIDTH / 2]}
+    />
+  );
+}
+function BallTracksCameraAndHeading() {
+  const { heading } = useGeolocation();
+  console.log("🌟🚨 ~ BallTracksCameraAndHeading ~ heading", heading);
+  const ref = useRef(null as any);
+  const { camera } = useThree();
+  useXRFrame((time, { session, trackedAnchors }) => {
+    if (!ref.current) return;
+    const newPosition = [
+      camera.position.x,
+      camera.position.y - 0.2,
+      camera.position.z - 1,
+    ];
+    // const rotated = rotatePoint(
+    //   newPosition,
+    // THREE.MathUtils.radToDeg(camera.rotation.y)
+    // );
+    const rotated = rotatePointAroundPoint(
+      newPosition,
+      [camera.position.x, camera.position.y, camera.position.z],
+      -camera.rotation.y
+      // THREE.MathUtils.radToDeg(camera.rotation.y)
+    );
+    console.log("🌟🚨 ~ useXRFrame ~ rotated", rotated);
+    ref.current.position.set(...rotated);
+  });
+
+  return (
+    <Sphere
+      ref={ref}
+      material-color="limegreen"
       material-transparent={true}
       material-opacity={0.3}
       args={[BOX_WIDTH / 2]}
@@ -154,4 +193,16 @@ function useRecalculateCubePositionsWhenWeGetGeolocation() {
     shouldRun: Boolean(heading) && cubes.length > 0,
     dependencies: [heading, cubes],
   });
+}
+
+function rotatePointAroundPoint(
+  point: [number, number, number] | number[],
+  center: [number, number, number] | number[],
+  angle: number = 0
+) {
+  const [x, y, z] = point;
+  const [cx, cy, cz] = center;
+  const newX = cx + Math.cos(angle) * (x - cx) - Math.sin(angle) * (y - cy);
+  const newZ = cz + Math.sin(angle) * (x - cx) + Math.cos(angle) * (y - cy);
+  return [newX, y, newZ];
 }
