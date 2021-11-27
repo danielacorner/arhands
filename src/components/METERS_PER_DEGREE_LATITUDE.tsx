@@ -26,14 +26,3 @@ export function getGeolocationInMeters({
   const z = latitude * METERS_PER_DEGREE_LATITUDE;
   return { x, y, z };
 }
-export function getNearestPlaceablePosition(
-  position: [number, number, number] | number[]
-) {
-  const [x, y, z] = position;
-
-  return [
-    Math.round(x / BOX_WIDTH) * BOX_WIDTH,
-    Math.round(y / BOX_WIDTH) * BOX_WIDTH,
-    Math.round(z / BOX_WIDTH) * BOX_WIDTH,
-  ];
-}

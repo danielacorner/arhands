@@ -11,12 +11,8 @@ import { Icon } from "@mui/material";
 import { LocationOff } from "@mui/icons-material";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
-import { useThree } from "@react-three/fiber";
+import { getGeolocationInMeters } from "./METERS_PER_DEGREE_LATITUDE";
 import { useCameraPositionFromGeolocation } from "../hooks/useCameraPositionFromGeolocation";
-import {
-  getNearestPlaceablePosition,
-  getGeolocationInMeters,
-} from "./METERS_PER_DEGREE_LATITUDE";
 
 export function PlaceableBlock() {
   const ref = useRef<any>(null);
@@ -83,7 +79,6 @@ export function PlaceableBlock() {
   //   );
   // });
 
-  const { camera } = useThree();
   // useXRFrame((time: number, xrFrame) => {
   //   console.log("🌟🚨 ~ useXRFrame ~ xrFrame", xrFrame);
   //   // const seconds = time / 1000;
@@ -259,11 +254,13 @@ function useNearestPlaceablePosition() {
   // take altitude,latitude,longitude as x,y,z ...
   // this is the user's initial position on Earth, in meters
   const [x, y, z] = useCameraPositionFromGeolocation();
-  const newPosition = getNearestPlaceablePosition([x, y, z - 2]);
+
+  // the new placeable position
+  const newPosition = getNearestPlaceablePosition([x, y, z + 4]);
 
   const [nearestPlaceablePosition, setNearestPlaceablePosition] = useState<
     [number, number, number] | number[]
-  >(getNearestPlaceablePosition([x, y, z]));
+  >(getNearestPlaceablePosition([x, y, z + 4]));
   // const { camera } = useThree();
 
   // set the nearest placeable position as you move around
@@ -298,4 +295,17 @@ const distanceBetweenPoints = (
 
 function isArrayEqual(arr1: any[], arr2: any[]) {
   return arr1.every((item, index) => item === arr2[index]);
+}
+
+function getNearestPlaceablePosition(
+  position: [number, number, number] | number[]
+) {
+  const [x, y, z] = position;
+
+  // round to the nearest box
+  return [
+    Math.round(x / BOX_WIDTH) * BOX_WIDTH,
+    Math.round(y / BOX_WIDTH) * BOX_WIDTH,
+    Math.round(z / BOX_WIDTH) * BOX_WIDTH,
+  ];
 }

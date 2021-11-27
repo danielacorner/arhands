@@ -31,9 +31,9 @@ export const useCubes = () => {
 };
 export const initialPositionAtom = atomWithStorage<
   number[] | [number, number, number]
->("initialPosition", []);
+>("initialPosition", [0, 0, 0]);
 export const useInitialPosition = () => {
-  return useAtom(cubesAtom);
+  return useAtom(initialPositionAtom);
 };
 
 // const ydoc = new Y.Doc();

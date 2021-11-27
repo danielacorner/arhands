@@ -1,25 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "./App.css";
-import { ARCanvas, DefaultXRControllers, Hands, useXR } from "@react-three/xr";
+import { ARCanvas, useXR } from "@react-three/xr";
 import { Leva } from "leva";
 import { useState } from "react";
 import { Physics } from "@react-three/cannon";
-import { Canvas } from "@react-three/fiber";
 import styled from "styled-components/macro";
-import {
-  useGeolocation,
-  useGeolocation,
-  useGeolocation,
-  useWindowSize,
-} from "react-use";
+import { useWindowSize } from "react-use";
 import { Player } from "./components/Player";
-import { Cube, Cubes } from "./components/Cubes";
-import {
-  PlaceableBlock,
-  useGetPositionFromGeolocation,
-} from "./components/PlaceableBlock";
+import { Cubes } from "./components/Cubes";
+import { PlaceableBlock } from "./components/PlaceableBlock";
 import { useEffectOnce } from "./hooks/useEffectOnce";
 import { useInitialPosition } from "./store";
+import { useCameraPositionFromGeolocation } from "./hooks/useCameraPositionFromGeolocation";
 
 export default function App() {
   const [count, setCount] = useState(0);
@@ -82,12 +74,13 @@ function Scene() {
 /** store the first geolocation we receive */
 function useStoreInitialGeolocation() {
   const [, setInitialPosition] = useInitialPosition();
-  const initialPosition = useGetPositionFromGeolocation();
+  const position = useCameraPositionFromGeolocation();
   useEffectOnce({
     callback: () => {
-      setInitialPosition(initialPosition);
+      console.log("🌟🚨 ~ useStoreInitialGeolocation ~ position", position);
+      setInitialPosition(position);
     },
-    shouldRun: initialPosition[0] !== 0,
-    dependencies: [initialPosition],
+    shouldRun: position[0] !== 0,
+    dependencies: [position],
   });
 }
