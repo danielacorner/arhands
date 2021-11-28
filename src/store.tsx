@@ -4,7 +4,7 @@ import * as THREE from "three";
 // import { bindProxyAndYMap } from "valtio-yjs";
 // import { WebrtcProvider } from "y-webrtc";
 import { atomWithStorage } from "jotai/utils";
-import { atom, useAtom } from "jotai";
+import { useAtom } from "jotai";
 
 // const SPEED = 5;
 const keys = {
@@ -25,7 +25,6 @@ export type CubeType = {
   position: [number, number, number] | number[];
   geolocation: { altitude: number; latitude: number; longitude: number };
 };
-// export const cubesAtom = atom<CubeType[]>([]);
 export const cubesAtom = atomWithStorage<CubeType[]>("atom:cubes", []);
 export const useCubes = () => {
   return useAtom(cubesAtom);

@@ -1,4 +1,3 @@
-import { useGeolocation /* , useInterval */ } from "react-use";
 import { useGeolocationInMeters } from "../components/METERS_PER_DEGREE_LATITUDE";
 
 /** convert geolocation to canvas camera position

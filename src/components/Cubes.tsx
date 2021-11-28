@@ -1,14 +1,11 @@
-import * as THREE from "three";
 import { useCallback, useRef, useState } from "react";
-import { useGeolocation, useOrientation } from "react-use";
+import { useGeolocation } from "react-use";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
-import { useGetPositionFromGeolocation } from "./PlaceableBlock";
-import { useEffectOnce } from "../hooks/useEffectOnce";
 import { useXRFrame } from "@react-three/xr";
 import { useThree } from "@react-three/fiber";
-import { Sphere } from "@react-three/drei";
-import { rotatePoint } from "../hooks/rotatePoint";
+import { Icosahedron, Sphere } from "@react-three/drei";
+import { useRecalculateCubePositionsWhenWeGetGeolocation } from "./useRecalculateCubePositionsWhenWeGetGeolocation";
 
 export function Cube({ position, materialProps = {} }) {
   const [, setCubes] = useCubes();
@@ -104,7 +101,7 @@ export function Cubes() {
       />
       <BallTracksCamera />
       <BallTracksCameraAndCameraRotation />
-      {/* <BallTracksCameraAndCameraRotationsNearestPlaceablePosition /> */}
+      <BallTracksCameraAndCameraRotationsNearestPlaceablePosition />
     </>
   );
 }
@@ -112,7 +109,7 @@ export function Cubes() {
 function BallTracksCamera() {
   const ref = useRef(null as any);
   const { camera } = useThree();
-  useXRFrame((time, { session, trackedAnchors }) => {
+  useXRFrame(() => {
     if (!ref.current) return;
     const newPosition = [
       camera.position.x,
@@ -137,7 +134,7 @@ function BallTracksCamera() {
 function BallTracksCameraAndCameraRotation() {
   const ref = useRef(null as any);
   const { camera } = useThree();
-  useXRFrame((time, { session, trackedAnchors }) => {
+  useXRFrame(() => {
     if (!ref.current) return;
     const [bx, by, bz] = [0, 0, -1.5];
     /** https://stackoverflow.com/a/17411276/11718078 */
@@ -170,30 +167,18 @@ function BallTracksCameraAndCameraRotation() {
     />
   );
 }
+function BallTracksCameraAndCameraRotationsNearestPlaceablePosition() {
+  const ref = useMoveToNearestPlaceablePosition();
 
-function useRecalculateCubePositionsWhenWeGetGeolocation() {
-  const [cubes, setCubes] = useCubes();
-
-  // when we get the geolocation,
-  // re-derive any stored cube positions in the scene
-  const { heading } = useGeolocation();
-  const getPositionFromGeolocation = useGetPositionFromGeolocation();
-  useEffectOnce({
-    callback: () => {
-      setCubes((prevCubes) =>
-        prevCubes.map((cube) => {
-          const position = getPositionFromGeolocation(cube.geolocation);
-          console.log("🌟🚨 ~ prevCubes.map ~ position", position);
-          return {
-            ...cube,
-            position,
-          };
-        })
-      );
-    },
-    shouldRun: Boolean(heading) && cubes.length > 0,
-    dependencies: [heading, cubes],
-  });
+  return (
+    <Icosahedron
+      ref={ref}
+      material-color="tomato"
+      material-transparent={true}
+      material-opacity={0.3}
+      args={[BOX_WIDTH / 2]}
+    />
+  );
 }
 
 /** https://stackoverflow.com/a/17411276/11718078 */
@@ -209,4 +194,38 @@ function rotate2DPointAroundCenter(
     y0 + Math.sin(angle) * (x1 - x0) + Math.cos(angle) * (y1 - y0),
   ];
   return [x2, y2];
+}
+
+export function useMoveToNearestPlaceablePosition() {
+  const ref = useRef(null as any);
+  const { camera } = useThree();
+  useXRFrame(() => {
+    if (!ref.current) return;
+    const [bx, by, bz] = [0, 0, -1.5];
+    /** https://stackoverflow.com/a/17411276/11718078 */
+    // rotate the ball position's x & z coords around the origin to face the camera
+    const [x1, z1] = rotate2DPointAroundCenter([bx, bz], -camera.rotation.y);
+    const [rx, ry, rz] = [x1, by, z1];
+
+    // * optional
+    // then we can also track the vertical rotation (around x axis)
+    // rotate the ball position's y (& z) coords around the origin to face the camera
+    const [y2, z2] = rotate2DPointAroundCenter([ry, rz], camera.rotation.x);
+
+    // finally, translate the ball position to the camera position
+    const translatedToCameraPosition = [
+      rx + camera.position.x,
+      y2 + camera.position.y,
+      z2 + camera.position.z,
+    ];
+
+    const translatedToNearestPlaceablePosition = [
+      Math.round(translatedToCameraPosition[0] / BOX_WIDTH) * BOX_WIDTH,
+      Math.round(translatedToCameraPosition[1] / BOX_WIDTH) * BOX_WIDTH,
+      Math.round(translatedToCameraPosition[2] / BOX_WIDTH) * BOX_WIDTH,
+    ];
+
+    ref.current.position.set(...translatedToNearestPlaceablePosition);
+  });
+  return ref;
 }

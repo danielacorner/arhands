@@ -5,21 +5,18 @@ import {
   // useXRFrame,
 } from "@react-three/xr";
 import { Box, Html } from "@react-three/drei";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { useGeolocation /* , useInterval */ } from "react-use";
 import { Icon } from "@mui/material";
 import { LocationOff } from "@mui/icons-material";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
-import {
-  getGeolocationInMeters,
-  useGeolocationInMeters,
-} from "./METERS_PER_DEGREE_LATITUDE";
-import { useCameraPositionFromGeolocation } from "../hooks/useCameraPositionFromGeolocation";
+import { getGeolocationInMeters } from "./METERS_PER_DEGREE_LATITUDE";
 import isEqual from "lodash.isequal";
+import { useMoveToNearestPlaceablePosition } from "./Cubes";
 
 export function PlaceableBlock() {
-  const ref = useRef<any>(null);
+  const ref = useMoveToNearestPlaceablePosition();
 
   // useHitTest((hit) => {
   //   if (!ref.current) {
@@ -77,33 +74,6 @@ export function PlaceableBlock() {
 
   // });
 
-  // useXRFrame((time: number, xrFrame) => {
-  //   // const seconds = time / 1000;
-  //   // const go = () % 1 === 0;
-  //   if (!ref.current) {
-  //     return;
-  //   }
-  //   const newPosition = [
-  //     camera.position.x,
-  //     camera.position.y,
-  //     camera.position.z - 2,
-  //   ];
-  //   ref.current.position.set(newPosition);
-  // });
-
-  // useInterval(() => {
-  //   if (!ref.current) {
-  //     return;
-  //   }
-
-  //   const newPosition = getNearestPlaceablePosition([
-  //     camera.position.x - 0.1,
-  //     camera.position.y + 0.1,
-  //     camera.position.z + 1,
-  //   ]);
-  //   ref.current.position.set(newPosition);
-  // }, 1000);
-
   const [isHovered, setIsHovered] = useState(false);
   const [cubes, setCubes] = useCubes();
   const {
@@ -138,27 +108,7 @@ export function PlaceableBlock() {
     setCubes((prevCubes) => [...prevCubes, newCube]);
   };
 
-  // TODO!!!!!!!!!!!!!!!!
-  const nearestPlaceablePosition = useNearestPlaceablePosition();
-
-  const geolocationMeters = useGeolocationInMeters();
-  const cubePosition = [
-    nearestPlaceablePosition[0] - geolocationMeters[0],
-    nearestPlaceablePosition[1] - geolocationMeters[1],
-    nearestPlaceablePosition[2] - geolocationMeters[2] - 5,
-  ];
-  console.log("🌟🚨 ~ Cube ~ cubePosition", cubePosition);
-  // useXRFrame((time, xrFrame) => {
-  //   if (!ref.current) {
-  //     return;
-  //   }
-  //   const newRotation = THREE.MathUtils.degToRad(heading);
-  //   ref.current.rotation = newRotation;
-  // });
-
-  // useFrame(() => {
-  //   ref.current.rotation = heading;
-  // });
+  // const geolocationMeters = useGeolocationInMeters();
 
   // useInteraction(ref, "onSelect", () => console.log("selected!"));
 
@@ -191,8 +141,6 @@ export function PlaceableBlock() {
       >
         <Box
           ref={ref}
-          // position={[0, 0, 0]}
-          position={cubePosition}
           args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]}
           material-transparent={true}
           material-opacity={0.5}
@@ -250,60 +198,60 @@ export function useGetPositionFromGeolocation() {
 // function useCameraPositionFromGeolocation
 
 /** get the position that the placeable block can currently be placed in */
-function useNearestPlaceablePosition() {
-  const [nearest, setNearest] = useState<[number, number, number] | number[]>([
-    0, 0, 0,
-  ]);
+// function useNearestPlaceablePosition() {
+//   const [nearest, setNearest] = useState<[number, number, number] | number[]>([
+//     0, 0, 0,
+//   ]);
 
-  // take altitude,latitude,longitude as x,y,z ...
-  // this is the user's initial position on Earth, in meters
-  const [x, y, z] = useCameraPositionFromGeolocation();
+//   // take altitude,latitude,longitude as x,y,z ...
+//   // this is the user's initial position on Earth, in meters
+//   const [x, y, z] = useCameraPositionFromGeolocation();
 
-  // the new placeable position
-  const newPosition = getNearestPlaceablePosition([x, y, z]);
+//   // the new placeable position
+//   const newPosition = getNearestPlaceablePosition([x, y, z]);
 
-  // set the nearest placeable position as you move around
-  useEffect(() => {
-    const distanceBetweenPoints = getDistanceBetweenPoints(
-      newPosition,
-      nearest
-    );
-    console.log(
-      "🌟🚨 ~ useEffect ~ distanceBetweenPoints",
-      distanceBetweenPoints
-    );
-    console.log(
-      "🌟🚨 ~ useEffect ~ blocksBetweenPoints",
-      distanceBetweenPoints / BOX_WIDTH
-    );
-    const shouldSet =
-      !isArrayEqual(newPosition, nearest) && distanceBetweenPoints > BOX_WIDTH;
-    if (shouldSet) {
-      console.log("🌟🌟🚨🚨 ~ nearestPlac", nearest);
-      console.log("🌟🌟🚨🚨 ~ newPosition", newPosition);
-      setNearest(newPosition);
-    }
-  }, [newPosition, nearest]);
-  // useXRFrame(() => {
-  //   //! too fast?
-  //   setNearest(newPosition);
-  // });
+//   // set the nearest placeable position as you move around
+//   useEffect(() => {
+//     const distanceBetweenPoints = getDistanceBetweenPoints(
+//       newPosition,
+//       nearest
+//     );
+//     console.log(
+//       "🌟🚨 ~ useEffect ~ distanceBetweenPoints",
+//       distanceBetweenPoints
+//     );
+//     console.log(
+//       "🌟🚨 ~ useEffect ~ blocksBetweenPoints",
+//       distanceBetweenPoints / BOX_WIDTH
+//     );
+//     const shouldSet =
+//       !isArrayEqual(newPosition, nearest) && distanceBetweenPoints > BOX_WIDTH;
+//     if (shouldSet) {
+//       console.log("🌟🌟🚨🚨 ~ nearestPlac", nearest);
+//       console.log("🌟🌟🚨🚨 ~ newPosition", newPosition);
+//       setNearest(newPosition);
+//     }
+//   }, [newPosition, nearest]);
+//   // useXRFrame(() => {
+//   //   //! too fast?
+//   //   setNearest(newPosition);
+//   // });
 
-  return [nearest[0], nearest[1], nearest[2] + 4];
-}
-const getDistanceBetweenPoints = (
-  a: [number, number, number] | number[],
-  b: [number, number, number] | number[]
-) => {
-  const x = a[0] - b[0];
-  const y = a[1] - b[1];
-  const z = a[2] - b[2];
-  return Math.sqrt(x * x + y * y + z * z);
-};
+//   return [nearest[0], nearest[1], nearest[2] + 4];
+// }
+// const getDistanceBetweenPoints = (
+//   a: [number, number, number] | number[],
+//   b: [number, number, number] | number[]
+// ) => {
+//   const x = a[0] - b[0];
+//   const y = a[1] - b[1];
+//   const z = a[2] - b[2];
+//   return Math.sqrt(x * x + y * y + z * z);
+// };
 
-function isArrayEqual(arr1: any[], arr2: any[]) {
-  return arr1.every((item, index) => item === arr2[index]);
-}
+// function isArrayEqual(arr1: any[], arr2: any[]) {
+//   return arr1.every((item, index) => item === arr2[index]);
+// }
 
 function getNearestPlaceablePosition([x, y, z]:
   | [number, number, number]
