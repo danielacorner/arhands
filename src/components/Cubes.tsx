@@ -104,6 +104,7 @@ export function Cubes() {
       />
       <BallTracksCamera />
       <BallTracksCameraAndCameraRotation />
+      {/* <BallTracksCameraAndCameraRotationsNearestPlaceablePosition /> */}
     </>
   );
 }
@@ -139,29 +140,21 @@ function BallTracksCameraAndCameraRotation() {
   useXRFrame((time, { session, trackedAnchors }) => {
     if (!ref.current) return;
     const [bx, by, bz] = [0, 0, -1.5];
-    // const rotated = rotatePoint(
-    //   newPosition,
-    // THREE.MathUtils.radToDeg(camera.rotation.y)
-    // );
-
     /** https://stackoverflow.com/a/17411276/11718078 */
     // rotate the ball position's x & z coords around the origin to face the camera
-    const [x1, z1] = rotate2DPointAroundCenter(
-      [bx, bz], // initial position: ;
-      -camera.rotation.y // rotate by the camera's rotation around the vertical axis
-      // THREE.MathUtils.radToDeg(camera.rotation.y)
-    );
-    const rotatedToForwardFacing = [x1, by, z1];
-    // ! optional
-    // const rotatedToMatchZAxis = rotatePointVerticallyAroundPoint(
-    //   rotatedToForwardFacing,
-    //   [camera.position.x, camera.position.y, camera.position.z],
-    //   camera.rotation.x
-    // );
+    const [x1, z1] = rotate2DPointAroundCenter([bx, bz], -camera.rotation.y);
+    const [rx, ry, rz] = [x1, by, z1];
+
+    // * optional
+    // then we can also track the vertical rotation (around x axis)
+    // rotate the ball position's y (& z) coords around the origin to face the camera
+    const [y2, z2] = rotate2DPointAroundCenter([ry, rz], camera.rotation.x);
+
+    // finally, translate the ball position to the camera position
     const translatedToCameraPosition = [
-      rotatedToForwardFacing[0] + camera.position.x,
-      rotatedToForwardFacing[1] + camera.position.y,
-      rotatedToForwardFacing[2] + camera.position.z,
+      rx + camera.position.x,
+      y2 + camera.position.y,
+      z2 + camera.position.z,
     ];
 
     ref.current.position.set(...translatedToCameraPosition);
