@@ -7,9 +7,36 @@ import { useThree } from "@react-three/fiber";
 import { Octahedron, Tetrahedron } from "@react-three/drei";
 import { useRecalculateCubePositionsWhenWeGetGeolocation } from "../hooks/useRecalculateCubePositionsWhenWeGetGeolocation";
 
-export function Cube({ position, materialProps = {} }) {
-  const [, setCubes] = useCubes();
+export function Cubes() {
+  const [cubes] = useCubes();
+  console.log("🟩🚨 ~ Cubes ~ cubes", cubes);
 
+  useRecalculateCubePositionsWhenWeGetGeolocation();
+
+  return (
+    <>
+      {cubes
+        .filter((c) => c.positionInScene)
+        .map(({ positionInScene, emoji }, index) => (
+          <Cube key={index} position={positionInScene} emoji={emoji} />
+        ))}
+      {/* reference cubes */}
+      <Cube
+        position={[0, 0, 0]}
+        materialProps={{
+          color: "slategrey",
+          transparent: true,
+          opacity: 0.4,
+        }}
+      />
+      <BallTracksCamera />
+      <BallTracksCameraAndCameraRotation />
+      {/* <BallTracksCameraAndCameraRotationsNearestPlaceablePosition /> */}
+    </>
+  );
+}
+
+export function Cube({ position, emoji = "", materialProps = {} }) {
   const ref = useRef<any>(null);
   // const [ref] = useBox(() => ({ type: "Static", ...props }));
   const [hover, set] = useState<any>(null);
@@ -19,25 +46,6 @@ export function Cube({ position, materialProps = {} }) {
     set(Math.floor(e.faceIndex / 2));
   }, []);
   const onOut = useCallback(() => set(null), []);
-  const { altitude, latitude, longitude } = useGeolocation();
-  // const onClick = useCallback(
-  //   (e) => {
-  //     console.log("🌟🚨 ~ Cube ~ e", e);
-  //     if (!ref.current) {
-  //       return;
-  //     }
-  //     e.stopPropagation();
-  //     const { x, y, z } = ref.current.position;
-  //     const dir = [[x + 1, y, z], [x - 1, y, z], [x, y + 1, z], [x, y - 1, z], [x, y, z + 1], [x, y, z - 1]]; // prettier-ignore
-  //     const newCube = {
-  //       positionInScene: dir[Math.floor(e.faceIndex / 2)] as any,
-  //       positionInWorld:
-  //       geolocation: { altitude, latitude, longitude },
-  //     };
-  //     setCubes((prev) => [...prev, newCube]);
-  //   },
-  //   [setCubes, altitude, latitude, longitude, ref]
-  // );
 
   return (
     <mesh
@@ -60,34 +68,6 @@ export function Cube({ position, materialProps = {} }) {
       ))}
       <boxBufferGeometry args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]} />
     </mesh>
-  );
-}
-export function Cubes() {
-  const [cubes] = useCubes();
-  console.log("🟩🚨 ~ Cubes ~ cubes", cubes);
-
-  useRecalculateCubePositionsWhenWeGetGeolocation();
-
-  return (
-    <>
-      {cubes
-        .filter((c) => c.positionInScene)
-        .map(({ positionInScene }, index) => (
-          <Cube key={index} position={positionInScene} />
-        ))}
-      {/* reference cubes */}
-      <Cube
-        position={[0, 0, 0]}
-        materialProps={{
-          color: "slategrey",
-          transparent: true,
-          opacity: 0.4,
-        }}
-      />
-      <BallTracksCamera />
-      <BallTracksCameraAndCameraRotation />
-      {/* <BallTracksCameraAndCameraRotationsNearestPlaceablePosition /> */}
-    </>
   );
 }
 

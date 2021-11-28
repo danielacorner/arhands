@@ -9,7 +9,7 @@ import { useCallback, useState } from "react";
 import { useGeolocation /* , useInterval */ } from "react-use";
 import { Icon } from "@mui/material";
 import { LocationOff } from "@mui/icons-material";
-import { useCubes } from "../store";
+import { useCubes, useEmojiPickerPosition } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
 import {
   getGeolocationFromPosition,
@@ -80,6 +80,7 @@ export function PlaceableBlock() {
 
   const [isHovered, setIsHovered] = useState(false);
   const [cubes, setCubes] = useCubes();
+  const [, setEmojiPickerPosition] = useEmojiPickerPosition();
   const {
     loading,
     // loading: false
@@ -106,43 +107,32 @@ export function PlaceableBlock() {
       return;
     }
     const newPosition = ref.current.position;
-    console.log("🌟🚨 ~ PlaceableBlock ~ userPosition", userPosition);
-    console.log("🌟🚨 ~ handleSelect ~ newPosition", newPosition);
     const relativeGeolocation = getGeolocationFromPosition(newPosition);
-    console.log(
-      "🌟🚨 ~ handleSelect ~ relativeGeolocation",
-      relativeGeolocation
-    );
     const newCubeGeolocation = {
       altitude: relativeGeolocation.altitude + altitude,
       latitude: relativeGeolocation.latitude + latitude,
       longitude: relativeGeolocation.longitude + longitude,
     };
-    console.log("🌟🚨 ~ handleSelect ~ {altitude, latitude, longitude}", {
-      altitude,
-      latitude,
-      longitude,
-    });
-    console.log("🌟🚨 ~ handleSelect ~ newCubeGeolocation", newCubeGeolocation);
     const newCube = {
       geolocation: newCubeGeolocation,
       positionInScene: getPositionFromGeolocation(newCubeGeolocation),
+      emoji: "",
     };
     const alreadyExists = cubes.find((c) =>
       isEqual(newCube.positionInScene, c.positionInScene)
     );
-
     if (alreadyExists) {
-      console.log("🌟🚨 ~ handleSelect ~ alreadyExists", alreadyExists);
       // delete the cube?!?!?
       setCubes((prevCubes) =>
         prevCubes.filter(
           (p) => !isEqual(p.positionInScene, newCube.positionInScene)
         )
       );
-      return;
+      setEmojiPickerPosition(newCube.positionInScene);
+    } else {
+      setCubes((prevCubes) => [...prevCubes, newCube]);
+      setEmojiPickerPosition(null);
     }
-    setCubes((prevCubes) => [...prevCubes, newCube]);
   };
 
   // const geolocationMeters = useGeolocationInMeters();

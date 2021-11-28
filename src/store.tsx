@@ -4,7 +4,7 @@ import * as THREE from "three";
 // import { bindProxyAndYMap } from "valtio-yjs";
 // import { WebrtcProvider } from "y-webrtc";
 import { atomWithStorage } from "jotai/utils";
-import { useAtom } from "jotai";
+import { atom, useAtom } from "jotai";
 
 // const SPEED = 5;
 const keys = {
@@ -24,6 +24,7 @@ export const speed = new THREE.Vector3();
 export type CubeType = {
   positionInScene: [number, number, number] | number[];
   geolocation: { altitude: number; latitude: number; longitude: number };
+  emoji: string;
 };
 export const cubesAtom = atomWithStorage<CubeType[]>("atom:cubes4", []);
 export const useCubes = () => {
@@ -43,6 +44,16 @@ export const initialGeolocationAtom = atomWithStorage<null | {
 }>("atom:initialGeolocation", null);
 export const useInitialGeolocation = () => {
   return useAtom(initialGeolocationAtom);
+};
+
+export const emojiPickerPositionAtom = atom<
+  null | number[] | [number, number, number]
+>(null);
+export const useEmojiPickerPosition = () => {
+  return useAtom(emojiPickerPositionAtom) as [
+    [number, number, number] | number[],
+    any
+  ];
 };
 
 // const ydoc = new Y.Doc();

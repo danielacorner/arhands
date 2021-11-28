@@ -2,15 +2,12 @@
 import "./App.css";
 import { ARCanvas, useXR } from "@react-three/xr";
 import { Leva } from "leva";
-import { Physics } from "@react-three/cannon";
 import styled from "styled-components/macro";
 import { useWindowSize } from "react-use";
-import { Player } from "./components/Player";
-import { Cubes } from "./components/Cubes";
-import { PlaceableBlock } from "./components/PlaceableBlock";
 import { useEffectOnce } from "./hooks/useEffectOnce";
 import { useInitialPosition } from "./store";
 import { useCameraPositionFromGeolocation } from "./hooks/useCameraPositionFromGeolocation";
+import { Scene } from "./Scene";
 
 export default function App() {
   // const { controllers, player } = useXR();
@@ -23,7 +20,13 @@ export default function App() {
           <div className="cta">Click "Start AR" 👇</div>
 
           <ARCanvas
-            sessionInit={{ requiredFeatures: ["hit-test"] }}
+            sessionInit={
+              {
+                // requiredFeatures: ["hit-test"],
+                optionalFeatures: ["dom-overlay"],
+                domOverlay: { root: document.body },
+              } as any
+            }
             style={{
               width,
               height,
@@ -50,22 +53,6 @@ const AppStyles = styled.div`
     text-shadow: -2px 2px 3px #000, 2px 1px 3px #000;
   }
 `;
-
-function Scene() {
-  const { px, py, pz } = { px: -2.15, py: 5, pz: 0.1 };
-  return (
-    <>
-      <ambientLight intensity={0.4} />
-      {/* <PlaceableBlock /> */}
-      <directionalLight position={[px, py, pz]} intensity={4} />
-      <Physics gravity={[0, -30, 0]}>
-        <Player />
-      </Physics>
-      <Cubes />
-      <PlaceableBlock />
-    </>
-  );
-}
 
 /** store the first geolocation we receive */
 function useStoreInitialGeolocation() {
