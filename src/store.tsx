@@ -25,7 +25,7 @@ export type CubeType = {
   position: [number, number, number] | number[];
   geolocation: { altitude: number; latitude: number; longitude: number };
 };
-export const cubesAtom = atomWithStorage<CubeType[]>("atom:cubes", []);
+export const cubesAtom = atomWithStorage<CubeType[]>("atom:cubes2", []);
 export const useCubes = () => {
   return useAtom(cubesAtom);
 };

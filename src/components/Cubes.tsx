@@ -4,7 +4,13 @@ import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
 import { useXRFrame } from "@react-three/xr";
 import { useThree } from "@react-three/fiber";
-import { Icosahedron, Sphere } from "@react-three/drei";
+import {
+  Dodecahedron,
+  Icosahedron,
+  Octahedron,
+  Sphere,
+  Tetrahedron,
+} from "@react-three/drei";
 import { useRecalculateCubePositionsWhenWeGetGeolocation } from "./useRecalculateCubePositionsWhenWeGetGeolocation";
 
 export function Cube({ position, materialProps = {} }) {
@@ -76,32 +82,16 @@ export function Cubes() {
         ))}
       {/* reference cubes */}
       <Cube
-        position={[0, 0, -1]}
-        materialProps={{
-          color: "cornflowerblue",
-          transparent: true,
-          opacity: 0.5,
-        }}
-      />
-      <Cube
         position={[0, 0, 0]}
-        materialProps={{ color: "steelblue", transparent: true, opacity: 0.5 }}
-      />
-      <Cube
-        position={[0, 1, 0]}
-        materialProps={{ color: "steelblue", transparent: true, opacity: 0.5 }}
-      />
-      <Cube
-        position={[0, 0, 2]}
-        materialProps={{ color: "limegreen", transparent: true, opacity: 0.5 }}
-      />
-      <Cube
-        position={[0, 0, 5]}
-        materialProps={{ color: "tomato", transparent: true, opacity: 0.5 }}
+        materialProps={{
+          color: "slategrey",
+          transparent: true,
+          opacity: 0.4,
+        }}
       />
       <BallTracksCamera />
       <BallTracksCameraAndCameraRotation />
-      <BallTracksCameraAndCameraRotationsNearestPlaceablePosition />
+      {/* <BallTracksCameraAndCameraRotationsNearestPlaceablePosition /> */}
     </>
   );
 }
@@ -122,7 +112,7 @@ function BallTracksCamera() {
   });
 
   return (
-    <Sphere
+    <Tetrahedron
       ref={ref}
       material-color="cornflowerblue"
       material-transparent={true}
@@ -158,7 +148,7 @@ function BallTracksCameraAndCameraRotation() {
   });
 
   return (
-    <Sphere
+    <Octahedron
       ref={ref}
       material-color="limegreen"
       material-transparent={true}
@@ -167,19 +157,19 @@ function BallTracksCameraAndCameraRotation() {
     />
   );
 }
-function BallTracksCameraAndCameraRotationsNearestPlaceablePosition() {
-  const ref = useMoveToNearestPlaceablePosition();
+// function BallTracksCameraAndCameraRotationsNearestPlaceablePosition() {
+//   const ref = useMoveToNearestPlaceablePosition();
 
-  return (
-    <Icosahedron
-      ref={ref}
-      material-color="tomato"
-      material-transparent={true}
-      material-opacity={0.3}
-      args={[BOX_WIDTH / 2]}
-    />
-  );
-}
+//   return (
+//     <Icosahedron
+//       ref={ref}
+//       material-color="tomato"
+//       material-transparent={true}
+//       material-opacity={0.3}
+//       args={[BOX_WIDTH / 2]}
+//     />
+//   );
+// }
 
 /** https://stackoverflow.com/a/17411276/11718078 */
 function rotate2DPointAroundCenter(
@@ -229,3 +219,14 @@ export function useMoveToNearestPlaceablePosition() {
   });
   return ref;
 }
+
+// function getNearestPlaceablePosition([x, y, z]:
+//   | [number, number, number]
+//   | number[]) {
+//   // round to the nearest box
+//   return [
+//     Math.round(x / BOX_WIDTH) * BOX_WIDTH,
+//     Math.round(y / BOX_WIDTH) * BOX_WIDTH,
+//     Math.round(z / BOX_WIDTH) * BOX_WIDTH,
+//   ];
+// }

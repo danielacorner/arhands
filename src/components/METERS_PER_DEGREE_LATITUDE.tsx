@@ -27,3 +27,17 @@ export function getGeolocationInMeters({
   const z = latitude * METERS_PER_DEGREE_LATITUDE;
   return { x, y, z };
 }
+export function getGeolocationFromPosition([x, y, z]: [
+  number,
+  number,
+  number
+]) {
+  // TODO: incorrect formula?
+  // const metersPerDegreeLongitude =
+  //   Math.cos(latitude) * METERS_PER_DEGREE_LATITUDE;
+  const longitude = x / METERS_PER_DEGREE_LATITUDE;
+  // const x = longitude * metersPerDegreeLongitude;
+  const altitude = y;
+  const latitude = z / METERS_PER_DEGREE_LATITUDE;
+  return { latitude, longitude, altitude };
+}

@@ -11,7 +11,10 @@ import { Icon } from "@mui/material";
 import { LocationOff } from "@mui/icons-material";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
-import { getGeolocationInMeters } from "./METERS_PER_DEGREE_LATITUDE";
+import {
+  getGeolocationFromPosition,
+  getGeolocationInMeters,
+} from "./METERS_PER_DEGREE_LATITUDE";
 import isEqual from "lodash.isequal";
 import { useMoveToNearestPlaceablePosition } from "./Cubes";
 
@@ -87,22 +90,41 @@ export function PlaceableBlock() {
     longitude,
     latitude,
   } = useGeolocation();
+  const getPositionFromGeolocation = useGetPositionFromGeolocation();
+  const userPosition = getPositionFromGeolocation({
+    altitude,
+    latitude,
+    longitude,
+  });
   const handleSelect = () => {
     if (!ref.current) {
       return;
     }
-    const newPosition = getNearestPlaceablePosition(ref.current.position);
+    const newPosition = ref.current.position;
+    console.log("🌟🚨 ~ PlaceableBlock ~ userPosition", userPosition);
     console.log("🌟🚨 ~ handleSelect ~ newPosition", newPosition);
+    const newCubeGeolocation = getGeolocationFromPosition(newPosition);
+    console.log("🌟🚨 ~ handleSelect ~ {altitude, latitude, longitude}", {
+      altitude,
+      latitude,
+      longitude,
+    });
+    console.log("🌟🚨 ~ handleSelect ~ newCubeGeolocation", newCubeGeolocation);
     const newCube = {
       position: newPosition,
-      geolocation: { altitude, latitude, longitude },
+      // TODO:? convert newPosition into associated geolocation, given current geolocation + distance from camera.position
+      geolocation: newCubeGeolocation,
     };
-    const alreadyExists = cubes.find((c) => isEqual(newCube, c));
+    const alreadyExists = cubes.find((c) =>
+      isEqual(newCube.position, c.position)
+    );
 
     if (alreadyExists) {
       console.log("🌟🚨 ~ handleSelect ~ alreadyExists", alreadyExists);
       // delete the cube?!?!?
-      setCubes((prevCubes) => prevCubes.filter((p) => !isEqual(p, newCube)));
+      setCubes((prevCubes) =>
+        prevCubes.filter((p) => !isEqual(p.position, newCube.position))
+      );
       return;
     }
     setCubes((prevCubes) => [...prevCubes, newCube]);
@@ -195,71 +217,42 @@ export function useGetPositionFromGeolocation() {
     [latitude, longitude, altitude]
   );
 }
-// function useCameraPositionFromGeolocation
 
-/** get the position that the placeable block can currently be placed in */
-// function useNearestPlaceablePosition() {
-//   const [nearest, setNearest] = useState<[number, number, number] | number[]>([
-//     0, 0, 0,
-//   ]);
+export function useGetGeolocationFromPosition() {
+  // 1. get geolocation
+  const { latitude, longitude, altitude } = useGeolocation();
+  // 2. get block geolocation
+  return useCallback(
+    (blockGeolocation: {
+      latitude: number;
+      longitude: number;
+      altitude: number;
+    }) => {
+      if (!blockGeolocation) {
+        return;
+      }
+      // 3. get x,y,z distances between geolocations in meters
+      const {
+        x: userX,
+        y: userY,
+        z: userZ,
+      } = getGeolocationInMeters({ latitude, longitude, altitude });
+      const {
+        x: blockX,
+        y: blockY,
+        z: blockZ,
+      } = getGeolocationInMeters({
+        latitude: blockGeolocation.latitude,
+        longitude: blockGeolocation.longitude,
+        altitude: blockGeolocation.altitude,
+      });
 
-//   // take altitude,latitude,longitude as x,y,z ...
-//   // this is the user's initial position on Earth, in meters
-//   const [x, y, z] = useCameraPositionFromGeolocation();
-
-//   // the new placeable position
-//   const newPosition = getNearestPlaceablePosition([x, y, z]);
-
-//   // set the nearest placeable position as you move around
-//   useEffect(() => {
-//     const distanceBetweenPoints = getDistanceBetweenPoints(
-//       newPosition,
-//       nearest
-//     );
-//     console.log(
-//       "🌟🚨 ~ useEffect ~ distanceBetweenPoints",
-//       distanceBetweenPoints
-//     );
-//     console.log(
-//       "🌟🚨 ~ useEffect ~ blocksBetweenPoints",
-//       distanceBetweenPoints / BOX_WIDTH
-//     );
-//     const shouldSet =
-//       !isArrayEqual(newPosition, nearest) && distanceBetweenPoints > BOX_WIDTH;
-//     if (shouldSet) {
-//       console.log("🌟🌟🚨🚨 ~ nearestPlac", nearest);
-//       console.log("🌟🌟🚨🚨 ~ newPosition", newPosition);
-//       setNearest(newPosition);
-//     }
-//   }, [newPosition, nearest]);
-//   // useXRFrame(() => {
-//   //   //! too fast?
-//   //   setNearest(newPosition);
-//   // });
-
-//   return [nearest[0], nearest[1], nearest[2] + 4];
-// }
-// const getDistanceBetweenPoints = (
-//   a: [number, number, number] | number[],
-//   b: [number, number, number] | number[]
-// ) => {
-//   const x = a[0] - b[0];
-//   const y = a[1] - b[1];
-//   const z = a[2] - b[2];
-//   return Math.sqrt(x * x + y * y + z * z);
-// };
-
-// function isArrayEqual(arr1: any[], arr2: any[]) {
-//   return arr1.every((item, index) => item === arr2[index]);
-// }
-
-function getNearestPlaceablePosition([x, y, z]:
-  | [number, number, number]
-  | number[]) {
-  // round to the nearest box
-  return [
-    Math.round(x / BOX_WIDTH) * BOX_WIDTH,
-    Math.round(y / BOX_WIDTH) * BOX_WIDTH,
-    Math.round(z / BOX_WIDTH) * BOX_WIDTH,
-  ];
+      const x = blockX - userX;
+      const y = blockY - userY;
+      const z = blockZ - userZ;
+      const blockPositionInScene = [x, y, z];
+      return blockPositionInScene;
+    },
+    [latitude, longitude, altitude]
+  );
 }
