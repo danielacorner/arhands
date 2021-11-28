@@ -17,6 +17,7 @@ import {
 } from "./METERS_PER_DEGREE_LATITUDE";
 import isEqual from "lodash.isequal";
 import { useMoveToNearestPlaceablePosition } from "./Cubes";
+import { getNearestPlaceablePosition } from "./getNearestPlaceablePosition";
 
 export function PlaceableBlock() {
   const ref = useMoveToNearestPlaceablePosition();
@@ -126,7 +127,6 @@ export function PlaceableBlock() {
     const newCube = {
       geolocation: newCubeGeolocation,
       positionInScene: getPositionFromGeolocation(newCubeGeolocation),
-      positionInWorld: newPosition,
     };
     const alreadyExists = cubes.find((c) =>
       isEqual(newCube.positionInScene, c.positionInScene)
@@ -226,7 +226,11 @@ export function useGetPositionFromGeolocation() {
       const x = blockX - userX;
       const y = blockY - userY;
       const z = blockZ - userZ;
-      const blockPositionInScene = [x, y, z];
+      const blockPositionInScene = getNearestPlaceablePosition([x, y, z]);
+      console.log(
+        "🌟🚨 ~ useGetPositionFromGeolocation ~ blockPositionInScene",
+        blockPositionInScene
+      );
       return blockPositionInScene;
     },
     [latitude, longitude, altitude, loading]
@@ -267,7 +271,7 @@ export function useGetGeolocationFromPosition() {
       console.log("🌟🚨 ~ useGetGeolocationFromPosition ~ blockX", blockX);
       const y = blockY - userY;
       const z = blockZ - userZ;
-      const blockPositionInScene = [x, y, z];
+      const blockPositionInScene = getNearestPlaceablePosition([x, y, z]);
       console.log(
         "🌟🚨 ~ useGetGeolocationFromPosition ~ blockPositionInScene",
         blockPositionInScene

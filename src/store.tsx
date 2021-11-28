@@ -22,7 +22,6 @@ export const rotation = new THREE.Vector3();
 export const speed = new THREE.Vector3();
 
 export type CubeType = {
-  positionInWorld: [number, number, number] | number[];
   positionInScene: [number, number, number] | number[];
   geolocation: { altitude: number; latitude: number; longitude: number };
 };
@@ -31,10 +30,19 @@ export const useCubes = () => {
   return useAtom(cubesAtom);
 };
 export const initialPositionAtom = atomWithStorage<
-  number[] | [number, number, number]
->("initialPosition", [0, 0, 0]);
+  null | number[] | [number, number, number]
+>("atom:initialPosition", null);
 export const useInitialPosition = () => {
   return useAtom(initialPositionAtom);
+};
+
+export const initialGeolocationAtom = atomWithStorage<null | {
+  altitude: number;
+  latitude: number;
+  longitude: number;
+}>("atom:initialGeolocation", null);
+export const useInitialGeolocation = () => {
+  return useAtom(initialGeolocationAtom);
 };
 
 // const ydoc = new Y.Doc();
