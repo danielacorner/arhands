@@ -103,7 +103,7 @@ export function Cubes() {
         materialProps={{ color: "tomato", transparent: true, opacity: 0.5 }}
       />
       <BallTracksCamera />
-      <BallTracksCameraAndHeading />
+      <BallTracksCameraAndCameraRotation />
     </>
   );
 }
@@ -133,30 +133,38 @@ function BallTracksCamera() {
     />
   );
 }
-function BallTracksCameraAndHeading() {
-  const { heading } = useGeolocation();
-  console.log("🌟🚨 ~ BallTracksCameraAndHeading ~ heading", heading);
+function BallTracksCameraAndCameraRotation() {
   const ref = useRef(null as any);
   const { camera } = useThree();
   useXRFrame((time, { session, trackedAnchors }) => {
     if (!ref.current) return;
-    const newPosition = [
-      camera.position.x,
-      camera.position.y - 0.2,
-      camera.position.z - 1,
-    ];
+    const [bx, by, bz] = [0, 0, -1.5];
     // const rotated = rotatePoint(
     //   newPosition,
     // THREE.MathUtils.radToDeg(camera.rotation.y)
     // );
-    const rotated = rotatePointAroundPoint(
-      newPosition,
-      [camera.position.x, camera.position.y, camera.position.z],
-      -camera.rotation.y
+
+    /** https://stackoverflow.com/a/17411276/11718078 */
+    // rotate the ball position's x & z coords around the origin to face the camera
+    const [x1, z1] = rotate2DPointAroundCenter(
+      [bx, bz], // initial position: ;
+      -camera.rotation.y // rotate by the camera's rotation around the vertical axis
       // THREE.MathUtils.radToDeg(camera.rotation.y)
     );
-    console.log("🌟🚨 ~ useXRFrame ~ rotated", rotated);
-    ref.current.position.set(...rotated);
+    const rotatedToForwardFacing = [x1, by, z1];
+    // ! optional
+    // const rotatedToMatchZAxis = rotatePointVerticallyAroundPoint(
+    //   rotatedToForwardFacing,
+    //   [camera.position.x, camera.position.y, camera.position.z],
+    //   camera.rotation.x
+    // );
+    const translatedToCameraPosition = [
+      rotatedToForwardFacing[0] + camera.position.x,
+      rotatedToForwardFacing[1] + camera.position.y,
+      rotatedToForwardFacing[2] + camera.position.z,
+    ];
+
+    ref.current.position.set(...translatedToCameraPosition);
   });
 
   return (
@@ -195,14 +203,17 @@ function useRecalculateCubePositionsWhenWeGetGeolocation() {
   });
 }
 
-function rotatePointAroundPoint(
-  point: [number, number, number] | number[],
-  center: [number, number, number] | number[],
-  angle: number = 0
+/** https://stackoverflow.com/a/17411276/11718078 */
+function rotate2DPointAroundCenter(
+  [x, y]: [number, number] | number[],
+  /** angle in radians */
+  angle: number
 ) {
-  const [x, y, z] = point;
-  const [cx, cy, cz] = center;
-  const newX = cx + Math.cos(angle) * (x - cx) - Math.sin(angle) * (y - cy);
-  const newZ = cz + Math.sin(angle) * (x - cx) + Math.cos(angle) * (y - cy);
-  return [newX, y, newZ];
+  const [x0, y0] = [0, 0];
+  const [x1, y1] = [x, y];
+  const [x2, y2] = [
+    x0 + Math.cos(angle) * (x1 - x0) - Math.sin(angle) * (y1 - y0),
+    y0 + Math.sin(angle) * (x1 - x0) + Math.cos(angle) * (y1 - y0),
+  ];
+  return [x2, y2];
 }
