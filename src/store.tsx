@@ -22,10 +22,11 @@ export const rotation = new THREE.Vector3();
 export const speed = new THREE.Vector3();
 
 export type CubeType = {
-  position: [number, number, number] | number[];
+  positionInWorld: [number, number, number] | number[];
+  positionInScene: [number, number, number] | number[];
   geolocation: { altitude: number; latitude: number; longitude: number };
 };
-export const cubesAtom = atomWithStorage<CubeType[]>("atom:cubes2", []);
+export const cubesAtom = atomWithStorage<CubeType[]>("atom:cubes4", []);
 export const useCubes = () => {
   return useAtom(cubesAtom);
 };

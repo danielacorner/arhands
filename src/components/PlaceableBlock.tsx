@@ -91,6 +91,10 @@ export function PlaceableBlock() {
     latitude,
   } = useGeolocation();
   const getPositionFromGeolocation = useGetPositionFromGeolocation();
+
+  // get the user's position,
+  // then derive each cube's position in the scene
+  // from by the difference between the user's position and the cube's position
   const userPosition = getPositionFromGeolocation({
     altitude,
     latitude,
@@ -103,7 +107,16 @@ export function PlaceableBlock() {
     const newPosition = ref.current.position;
     console.log("🌟🚨 ~ PlaceableBlock ~ userPosition", userPosition);
     console.log("🌟🚨 ~ handleSelect ~ newPosition", newPosition);
-    const newCubeGeolocation = getGeolocationFromPosition(newPosition);
+    const relativeGeolocation = getGeolocationFromPosition(newPosition);
+    console.log(
+      "🌟🚨 ~ handleSelect ~ relativeGeolocation",
+      relativeGeolocation
+    );
+    const newCubeGeolocation = {
+      altitude: relativeGeolocation.altitude + altitude,
+      latitude: relativeGeolocation.latitude + latitude,
+      longitude: relativeGeolocation.longitude + longitude,
+    };
     console.log("🌟🚨 ~ handleSelect ~ {altitude, latitude, longitude}", {
       altitude,
       latitude,
@@ -111,19 +124,21 @@ export function PlaceableBlock() {
     });
     console.log("🌟🚨 ~ handleSelect ~ newCubeGeolocation", newCubeGeolocation);
     const newCube = {
-      position: newPosition,
-      // TODO:? convert newPosition into associated geolocation, given current geolocation + distance from camera.position
       geolocation: newCubeGeolocation,
+      positionInScene: getPositionFromGeolocation(newCubeGeolocation),
+      positionInWorld: newPosition,
     };
     const alreadyExists = cubes.find((c) =>
-      isEqual(newCube.position, c.position)
+      isEqual(newCube.positionInScene, c.positionInScene)
     );
 
     if (alreadyExists) {
       console.log("🌟🚨 ~ handleSelect ~ alreadyExists", alreadyExists);
       // delete the cube?!?!?
       setCubes((prevCubes) =>
-        prevCubes.filter((p) => !isEqual(p.position, newCube.position))
+        prevCubes.filter(
+          (p) => !isEqual(p.positionInScene, newCube.positionInScene)
+        )
       );
       return;
     }
@@ -166,7 +181,7 @@ export function PlaceableBlock() {
           args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]}
           material-transparent={true}
           material-opacity={0.5}
-          material-color={isHovered ? "#06ad30" : "#ad0606"}
+          material-color={isHovered ? "#06ad30" : "#74c3d1"}
           {...({} as any)}
         />
       </Interactive>
@@ -181,7 +196,7 @@ export function PlaceableBlock() {
 
 export function useGetPositionFromGeolocation() {
   // 1. get geolocation
-  const { latitude, longitude, altitude } = useGeolocation();
+  const { latitude, longitude, altitude, loading } = useGeolocation();
   // 2. get block geolocation
   return useCallback(
     (blockGeolocation: {
@@ -189,7 +204,7 @@ export function useGetPositionFromGeolocation() {
       longitude: number;
       altitude: number;
     }) => {
-      if (!blockGeolocation) {
+      if (!blockGeolocation || loading) {
         return;
       }
       // 3. get x,y,z distances between geolocations in meters
@@ -214,7 +229,7 @@ export function useGetPositionFromGeolocation() {
       const blockPositionInScene = [x, y, z];
       return blockPositionInScene;
     },
-    [latitude, longitude, altitude]
+    [latitude, longitude, altitude, loading]
   );
 }
 
@@ -248,9 +263,15 @@ export function useGetGeolocationFromPosition() {
       });
 
       const x = blockX - userX;
+      console.log("🌟🚨 ~ useGetGeolocationFromPosition ~ userX", userX);
+      console.log("🌟🚨 ~ useGetGeolocationFromPosition ~ blockX", blockX);
       const y = blockY - userY;
       const z = blockZ - userZ;
       const blockPositionInScene = [x, y, z];
+      console.log(
+        "🌟🚨 ~ useGetGeolocationFromPosition ~ blockPositionInScene",
+        blockPositionInScene
+      );
       return blockPositionInScene;
     },
     [latitude, longitude, altitude]

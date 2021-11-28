@@ -1,1 +1,1 @@
-export const BOX_WIDTH = 0.2;
+export const BOX_WIDTH = 0.25;

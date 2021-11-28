@@ -4,14 +4,8 @@ import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
 import { useXRFrame } from "@react-three/xr";
 import { useThree } from "@react-three/fiber";
-import {
-  Dodecahedron,
-  Icosahedron,
-  Octahedron,
-  Sphere,
-  Tetrahedron,
-} from "@react-three/drei";
-import { useRecalculateCubePositionsWhenWeGetGeolocation } from "./useRecalculateCubePositionsWhenWeGetGeolocation";
+import { Octahedron, Tetrahedron } from "@react-three/drei";
+import { useRecalculateCubePositionsWhenWeGetGeolocation } from "../hooks/useRecalculateCubePositionsWhenWeGetGeolocation";
 
 export function Cube({ position, materialProps = {} }) {
   const [, setCubes] = useCubes();
@@ -26,23 +20,24 @@ export function Cube({ position, materialProps = {} }) {
   }, []);
   const onOut = useCallback(() => set(null), []);
   const { altitude, latitude, longitude } = useGeolocation();
-  const onClick = useCallback(
-    (e) => {
-      console.log("🌟🚨 ~ Cube ~ e", e);
-      if (!ref.current) {
-        return;
-      }
-      e.stopPropagation();
-      const { x, y, z } = ref.current.position;
-      const dir = [[x + 1, y, z], [x - 1, y, z], [x, y + 1, z], [x, y - 1, z], [x, y, z + 1], [x, y, z - 1]]; // prettier-ignore
-      const newCube = {
-        position: dir[Math.floor(e.faceIndex / 2)] as any,
-        geolocation: { altitude, latitude, longitude },
-      };
-      setCubes((prev) => [...prev, newCube]);
-    },
-    [setCubes, altitude, latitude, longitude, ref]
-  );
+  // const onClick = useCallback(
+  //   (e) => {
+  //     console.log("🌟🚨 ~ Cube ~ e", e);
+  //     if (!ref.current) {
+  //       return;
+  //     }
+  //     e.stopPropagation();
+  //     const { x, y, z } = ref.current.position;
+  //     const dir = [[x + 1, y, z], [x - 1, y, z], [x, y + 1, z], [x, y - 1, z], [x, y, z + 1], [x, y, z - 1]]; // prettier-ignore
+  //     const newCube = {
+  //       positionInScene: dir[Math.floor(e.faceIndex / 2)] as any,
+  //       positionInWorld:
+  //       geolocation: { altitude, latitude, longitude },
+  //     };
+  //     setCubes((prev) => [...prev, newCube]);
+  //   },
+  //   [setCubes, altitude, latitude, longitude, ref]
+  // );
 
   return (
     <mesh
@@ -51,7 +46,7 @@ export function Cube({ position, materialProps = {} }) {
       castShadow
       onPointerMove={onMove}
       onPointerOut={onOut}
-      onClick={onClick}
+      // onClick={onClick}
       position={position}
     >
       {[...Array(6)].map((_, index) => (
@@ -76,9 +71,9 @@ export function Cubes() {
   return (
     <>
       {cubes
-        .filter((c) => c.position)
-        .map(({ position }, index) => (
-          <Cube key={index} position={position} />
+        .filter((c) => c.positionInScene)
+        .map(({ positionInScene }, index) => (
+          <Cube key={index} position={positionInScene} />
         ))}
       {/* reference cubes */}
       <Cube
