@@ -3,14 +3,23 @@ import { Player } from "./components/Player";
 import { Cubes } from "./components/Cubes";
 import { PlaceableBlock } from "./components/PlaceableBlock";
 import { Billboard, Box, Html } from "@react-three/drei";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Picker } from "emoji-mart";
 import "emoji-mart/css/emoji-mart.css";
 import { BOX_WIDTH } from "./utils/constants";
-import { useEmojiPickerPosition } from "./store";
+import { useEmojiPickerPosition, useIsPresenting } from "./store";
+import { useXR } from "@react-three/xr";
 
 export function Scene() {
   const { px, py, pz } = { px: -2.15, py: 5, pz: 0.1 };
+
+  // sync isPresenting to store
+  const { isPresenting } = useXR();
+  const [, setIsPresenting] = useIsPresenting();
+  useEffect(() => {
+    setIsPresenting(isPresenting);
+  }, [isPresenting, setIsPresenting]);
+
   return (
     <>
       <ambientLight intensity={0.4} />
@@ -47,11 +56,11 @@ function EmojiPickerMenu() {
         material-color="#ceb422d6"
         args={[BOX_WIDTH / 2, BOX_WIDTH / 2, BOX_WIDTH / 2]}
       />
-      <Billboard>
-        <Html transform={true}>
-          <Picker title="Pick your emoji…" emoji="point_up" />
-        </Html>
-      </Billboard>
+      {/* <Billboard> */}
+      <Html transform={true} scale={0.1}>
+        <Picker title="Pick your emoji…" emoji="point_up" />
+      </Html>
+      {/* </Billboard> */}
     </mesh>
   ) : null;
 }

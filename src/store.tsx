@@ -21,15 +21,23 @@ export const moveFieldByKey = (key) => keys[key];
 export const rotation = new THREE.Vector3();
 export const speed = new THREE.Vector3();
 
+/** These cubes can be placed around the scene.
+ */
 export type CubeType = {
+  /** The camera starts at position [0, 0, 0], and each cube position is relative to that.
+   * This is derivable from geolocation.
+   */
   positionInScene: [number, number, number] | number[];
+  /** The cube's geolocation. This can be used to determine its position. */
   geolocation: { altitude: number; latitude: number; longitude: number };
+  /** an emoji that appears inside the box */
   emoji: string;
 };
 export const cubesAtom = atomWithStorage<CubeType[]>("atom:cubes4", []);
 export const useCubes = () => {
   return useAtom(cubesAtom);
 };
+
 export const initialPositionAtom = atomWithStorage<
   null | number[] | [number, number, number]
 >("atom:initialPosition", null);
@@ -54,6 +62,10 @@ export const useEmojiPickerPosition = () => {
     [number, number, number] | number[],
     any
   ];
+};
+export const isPresentingAtom = atom<boolean>(false);
+export const useIsPresenting = () => {
+  return useAtom(isPresentingAtom);
 };
 
 // const ydoc = new Y.Doc();

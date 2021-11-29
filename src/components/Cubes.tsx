@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState } from "react";
-import { useGeolocation } from "react-use";
 import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
 import { useXRFrame } from "@react-three/xr";

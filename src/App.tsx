@@ -5,7 +5,7 @@ import { Leva } from "leva";
 import styled from "styled-components/macro";
 import { useWindowSize } from "react-use";
 import { useEffectOnce } from "./hooks/useEffectOnce";
-import { useInitialPosition } from "./store";
+import { useInitialPosition, useIsPresenting } from "./store";
 import { useCameraPositionFromGeolocation } from "./hooks/useCameraPositionFromGeolocation";
 import { Scene } from "./Scene";
 
@@ -13,32 +13,39 @@ export default function App() {
   // const { controllers, player } = useXR();
   useStoreInitialGeolocation();
   const { height, width } = useWindowSize();
+
+  const [isPresenting] = useIsPresenting();
+
   return (
     <>
       <AppStyles className="App">
-        <header className="App-header">
-          <div className="cta">Click "Start AR" 👇</div>
-
-          <ARCanvas
-            sessionInit={
-              {
-                // requiredFeatures: ["hit-test"],
-                optionalFeatures: ["dom-overlay"],
-                domOverlay: { root: document.body },
-              } as any
-            }
-            style={{
-              width,
-              height,
-            }}
-          >
-            {/* <DefaultXRControllers />
-            <Hands /> */}
-            <Scene />
-          </ARCanvas>
-        </header>
+        {!isPresenting && (
+          <header className="App-header">
+            <div className="cta">Click "Start AR" 👇</div>
+          </header>
+        )}
       </AppStyles>
       {process.env.NODE_ENV === "development" && <Leva />}
+      <ARCanvas
+        onAbort={() => {
+          console.log("onAbort");
+        }}
+        sessionInit={
+          {
+            // requiredFeatures: ["hit-test"],
+            optionalFeatures: ["dom-overlay"],
+            domOverlay: { root: document.body },
+          } as any
+        }
+        style={{
+          width,
+          height,
+        }}
+      >
+        {/* <DefaultXRControllers />
+            <Hands /> */}
+        <Scene />
+      </ARCanvas>
     </>
   );
 }
