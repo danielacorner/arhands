@@ -21,7 +21,6 @@ import { getNearestPlaceablePosition } from "./getNearestPlaceablePosition";
 
 export function PlaceableBlock() {
   const ref = useMoveToNearestPlaceablePosition();
-
   // useHitTest((hit) => {
   //   if (!ref.current) {
   //     return;
@@ -80,7 +79,8 @@ export function PlaceableBlock() {
 
   const [isHovered, setIsHovered] = useState(false);
   const [cubes, setCubes] = useCubes();
-  const [, setEmojiPickerPosition] = useEmojiPickerPosition();
+  const [emojiPickerPosition, setEmojiPickerPosition] =
+    useEmojiPickerPosition();
   const {
     loading,
     // loading: false
@@ -102,8 +102,9 @@ export function PlaceableBlock() {
     latitude,
     longitude,
   });
+
   const handleSelect = () => {
-    if (!ref.current) {
+    if (!ref.current || emojiPickerPosition) {
       return;
     }
     const newPosition = ref.current.position;
@@ -123,15 +124,14 @@ export function PlaceableBlock() {
     );
     if (alreadyExists) {
       // delete the cube?!?!?
-      setCubes((prevCubes) =>
-        prevCubes.filter(
-          (p) => !isEqual(p.positionInScene, newCube.positionInScene)
-        )
-      );
+      // setCubes((prevCubes) =>
+      //   prevCubes.filter(
+      //     (p) => !isEqual(p.positionInScene, newCube.positionInScene)
+      //   )
+      // );
       setEmojiPickerPosition(newCube.positionInScene);
     } else {
       setCubes((prevCubes) => [...prevCubes, newCube]);
-      setEmojiPickerPosition(null);
     }
   };
 

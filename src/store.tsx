@@ -67,6 +67,12 @@ export const isPresentingAtom = atom<boolean>(false);
 export const useIsPresenting = () => {
   return useAtom(isPresentingAtom);
 };
+// export const selectedPositionAtom = atom<number[] | [number, number, number]>([
+//   0, 0, 0,
+// ]);
+// export const useSelectedPosition = () => {
+//   return useAtom(selectedPositionAtom);
+// };
 
 // const ydoc = new Y.Doc();
 // const ymap = ydoc.getMap("map");

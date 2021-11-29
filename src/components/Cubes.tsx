@@ -3,7 +3,13 @@ import { useCubes } from "../store";
 import { BOX_WIDTH } from "../utils/constants";
 import { useXRFrame } from "@react-three/xr";
 import { useThree } from "@react-three/fiber";
-import { Octahedron, Tetrahedron } from "@react-three/drei";
+import {
+  Billboard,
+  Html,
+  Octahedron,
+  Tetrahedron,
+  Text,
+} from "@react-three/drei";
 import { useRecalculateCubePositionsWhenWeGetGeolocation } from "../hooks/useRecalculateCubePositionsWhenWeGetGeolocation";
 
 export function Cubes() {
@@ -66,6 +72,13 @@ export function Cube({ position, emoji = "", materialProps = {} }) {
         />
       ))}
       <boxBufferGeometry args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]} />
+      {emoji ? (
+        <Billboard>
+          <Html transform={true} scale={0.1}>
+            {emoji}
+          </Html>
+        </Billboard>
+      ) : null}
     </mesh>
   );
 }
@@ -190,6 +203,14 @@ export function useMoveToNearestPlaceablePosition() {
     ];
 
     ref.current.position.set(...translatedToNearestPlaceablePosition);
+
+    // const didPositionChange = !isEqual(
+    //   selectedPosition,
+    //   translatedToNearestPlaceablePosition
+    // );
+    // if (didPositionChange) {
+    //   setSelectedPosition(translatedToNearestPlaceablePosition);
+    // }
   });
   return ref;
 }
