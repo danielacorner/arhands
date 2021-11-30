@@ -62,23 +62,34 @@ export function Cube({ position, emoji = "", materialProps = {} }) {
       // onClick={onClick}
       position={position}
     >
-      {[...Array(6)].map((_, index) => (
-        <meshStandardMaterial
-          attachArray="material"
-          key={index}
-          // map={texture}
-          {...materialProps}
-          // color={hover === index ? "hotpink" : "white"}
-        />
-      ))}
-      <boxBufferGeometry args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]} />
       {emoji ? (
-        <Billboard>
-          <Html transform={true} scale={0.1}>
-            {emoji}
-          </Html>
-        </Billboard>
-      ) : null}
+        <>
+          <Billboard>
+            <Html transform={true} scale={0.4}>
+              {emoji}
+            </Html>
+          </Billboard>
+          <meshStandardMaterial
+            transparent={true}
+            opacity={0.5}
+            color={"#5ab8e4"}
+          />
+          <sphereBufferGeometry args={[BOX_WIDTH / 2]} />
+        </>
+      ) : (
+        <>
+          {[...Array(6)].map((_, index) => (
+            <meshStandardMaterial
+              attachArray="material"
+              key={index}
+              // map={texture}
+              {...materialProps}
+              // color={hover === index ? "hotpink" : "white"}
+            />
+          ))}
+          <boxBufferGeometry args={[BOX_WIDTH, BOX_WIDTH, BOX_WIDTH]} />
+        </>
+      )}
     </mesh>
   );
 }
