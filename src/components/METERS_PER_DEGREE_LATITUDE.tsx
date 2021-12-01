@@ -23,7 +23,8 @@ export function getGeolocationInMeters({
   //   Math.cos(latitude) * METERS_PER_DEGREE_LATITUDE;
   const x = longitude * METERS_PER_DEGREE_LATITUDE;
   // const x = longitude * metersPerDegreeLongitude;
-  const y = altitude;
+  const y = altitude / 0.04;
+  console.log("🌟🚨 ~ altitude", altitude);
   const z = latitude * METERS_PER_DEGREE_LATITUDE;
   return { x, y, z };
 }

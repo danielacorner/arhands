@@ -189,7 +189,8 @@ export function useMoveToNearestPlaceablePosition() {
   const { camera } = useThree();
   useXRFrame(() => {
     if (!ref.current) return;
-    const [bx, by, bz] = [0, 0, -1.5];
+    // initial cube position
+    const [bx, by, bz] = [0, 0, -0.8];
     /** https://stackoverflow.com/a/17411276/11718078 */
     // rotate the ball position's x & z coords around the origin to face the camera
     const [x1, z1] = rotate2DPointAroundCenter([bx, bz], -camera.rotation.y);

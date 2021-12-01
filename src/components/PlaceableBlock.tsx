@@ -135,8 +135,6 @@ export function PlaceableBlock() {
     }
   };
 
-  // const geolocationMeters = useGeolocationInMeters();
-
   // useInteraction(ref, "onSelect", () => console.log("selected!"));
 
   return (
@@ -198,11 +196,13 @@ export function useGetPositionFromGeolocation() {
         return;
       }
       // 3. get x,y,z distances between geolocations in meters
+      // user geolocation
       const {
         x: userX,
         y: userY,
         z: userZ,
       } = getGeolocationInMeters({ latitude, longitude, altitude });
+      // block geolocation
       const {
         x: blockX,
         y: blockY,
@@ -213,10 +213,14 @@ export function useGetPositionFromGeolocation() {
         altitude: blockGeolocation.altitude,
       });
 
-      const x = blockX - userX;
-      const y = blockY - userY;
-      const z = blockZ - userZ;
+      // position in scene = block position - user position
+      const [x, y, z] = [blockX - userX, blockY - userY, blockZ - userZ];
       const blockPositionInScene = getNearestPlaceablePosition([x, y, z]);
+      console.log("🌟🚨 ~ useGetPositionFromGeolocation ~ [x, y, z]", [
+        x,
+        y,
+        z,
+      ]);
       console.log(
         "🌟🚨 ~ useGetPositionFromGeolocation ~ blockPositionInScene",
         blockPositionInScene
