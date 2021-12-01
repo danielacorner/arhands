@@ -107,6 +107,7 @@ export function PlaceableBlock() {
     if (!ref.current || emojiPickerPosition) {
       return;
     }
+
     const newPosition = ref.current.position;
     const relativeGeolocation = getGeolocationFromPosition(newPosition);
     const newCubeGeolocation = {
@@ -123,13 +124,17 @@ export function PlaceableBlock() {
       isEqual(newCube.positionInScene, c.positionInScene)
     );
     if (alreadyExists) {
+      console.log(
+        "🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🚨 ~ handleSelect ~ alreadyExists",
+        alreadyExists
+      );
       // delete the cube?!?!?
       // setCubes((prevCubes) =>
       //   prevCubes.filter(
       //     (p) => !isEqual(p.positionInScene, newCube.positionInScene)
       //   )
       // );
-      setEmojiPickerPosition(newCube.positionInScene);
+      setEmojiPickerPosition((p) => (p ? null : newCube.positionInScene));
     } else {
       setCubes((prevCubes) => [...prevCubes, newCube]);
     }
@@ -202,6 +207,9 @@ export function useGetPositionFromGeolocation() {
         y: userY,
         z: userZ,
       } = getGeolocationInMeters({ latitude, longitude, altitude });
+
+      // TODO: each block can't hold its own geolocation? (not accurate enough?)
+
       // block geolocation
       const {
         x: blockX,

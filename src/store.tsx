@@ -33,7 +33,7 @@ export type CubeType = {
   /** an emoji that appears inside the box */
   emoji: string;
 };
-export const cubesAtom = atomWithStorage<CubeType[]>("atom:cubes4", []);
+export const cubesAtom = atomWithStorage<CubeType[]>("atom:cubes5", []);
 export const useCubes = () => {
   return useAtom(cubesAtom);
 };
