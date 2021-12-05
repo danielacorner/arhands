@@ -184,13 +184,14 @@ function rotate2DPointAroundCenter(
   return [x2, y2];
 }
 
+const BOX_INITIAL_POSITION = [0, 0, -1.2];
 export function useMoveToNearestPlaceablePosition() {
   const ref = useRef(null as any);
   const { camera } = useThree();
   useXRFrame(() => {
     if (!ref.current) return;
     // initial cube position
-    const [bx, by, bz] = [0, 0, -0.8];
+    const [bx, by, bz] = BOX_INITIAL_POSITION;
     /** https://stackoverflow.com/a/17411276/11718078 */
     // rotate the ball position's x & z coords around the origin to face the camera
     const [x1, z1] = rotate2DPointAroundCenter([bx, bz], -camera.rotation.y);

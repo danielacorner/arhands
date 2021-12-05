@@ -134,7 +134,9 @@ export function PlaceableBlock() {
       //     (p) => !isEqual(p.positionInScene, newCube.positionInScene)
       //   )
       // );
-      setEmojiPickerPosition((p) => (p ? null : newCube.positionInScene));
+      setTimeout(() => {
+        setEmojiPickerPosition((p) => (p ? null : newCube.positionInScene));
+      }, 0);
     } else {
       setCubes((prevCubes) => [...prevCubes, newCube]);
     }
